@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { $ } from 'bun';
+import chalk from 'chalk';
 
 interface PullRequest {
   number: number;
@@ -36,15 +37,15 @@ async function buildPRChain(startBranch: string, baseBranch: string): Promise<st
 }
 
 async function executeGitCommand(command: string): Promise<void> {
-  console.log(`Executing: ${command}`);
+  console.log(chalk.gray(`Executing: ${command}`));
   await $`${{ raw: command }}`;
 }
 
 async function propagateChanges(baseBranch: string, targetBranch: string): Promise<void> {
-  console.log(`Building PR chain from ${baseBranch} to ${targetBranch}...`);
+  console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
   const chain = await buildPRChain(targetBranch, baseBranch);
-  console.log(`PR chain: ${chain.join(' ← ')}`);
+  console.log(chalk.green(`📋 PR chain: ${chain.map(branch => chalk.yellow(branch)).join(chalk.gray(' ← '))}`));
 
   // Merge changes in reverse order (from base to target)
   const reversedChain = [...chain].reverse();
@@ -53,7 +54,7 @@ async function propagateChanges(baseBranch: string, targetBranch: string): Promi
     const sourceBranch = reversedChain[i];
     const targetBranch = reversedChain[i + 1];
 
-    console.log(`\nMerging ${sourceBranch} into ${targetBranch}...`);
+    console.log(chalk.blue(`\n🔄 Merging ${chalk.cyan(sourceBranch)} into ${chalk.cyan(targetBranch)}...`));
 
     // Switch to source branch and pull latest
     await executeGitCommand(`git switch ${sourceBranch}`);
@@ -68,24 +69,29 @@ async function propagateChanges(baseBranch: string, targetBranch: string): Promi
     await executeGitCommand(`git push`);
   }
 
-  console.log(`\nPropagation complete! ${targetBranch} is now up to date.`);
+  console.log(chalk.green(`\n✅ Propagation complete! ${chalk.cyan(targetBranch)} is now up to date.`));
 }
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
 
   if (args.length !== 2) {
-    console.error('Usage: gh-propagate <base-branch> <target-branch>');
-    console.error('Example: gh-propagate dev feature-2');
+    console.error(chalk.red('❌ Usage: gh-propagate <base-branch> <target-branch>'));
+    console.error(chalk.yellow('💡 Example: gh-propagate dev feature-2'));
     process.exit(1);
   }
 
   const [baseBranch, targetBranch] = args;
 
+  if (!baseBranch || !targetBranch) {
+    console.error(chalk.red('❌ Both base-branch and target-branch are required'));
+    process.exit(1);
+  }
+
   try {
     await propagateChanges(baseBranch, targetBranch);
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error(chalk.red('❌ Error:'), error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }

@@ -11,9 +11,13 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/chalk": "^2.2.4",
     "@types/node": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1"
   }
 }

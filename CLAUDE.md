@@ -1,6 +1,7 @@
 ## Development Notes
 
 - When working with shell commands, prefer using `import { $ } from 'bun'` instead of `import { execSync } from 'child_process'`
+- Avoid using TypeScript non-null assertion operator (`!`) - use proper type guards instead
 
 ## gh-propagate Implementation Notes
 
