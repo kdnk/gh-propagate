@@ -1,6 +1,6 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
-import { execSync } from 'child_process';
+import { $ } from 'bun';
 
 interface PullRequest {
   number: number;
@@ -10,7 +10,7 @@ interface PullRequest {
 
 async function getPullRequest(branch: string): Promise<PullRequest | null> {
   try {
-    const result = execSync(`gh pr view --json number,headRefName,baseRefName --head ${branch}`, { encoding: 'utf8' });
+    const result = await $`gh pr view --json number,headRefName,baseRefName --head ${branch}`.text();
     return JSON.parse(result);
   } catch (error) {
     return null;
@@ -35,9 +35,9 @@ async function buildPRChain(startBranch: string, baseBranch: string): Promise<st
   return chain;
 }
 
-function executeGitCommand(command: string): void {
+async function executeGitCommand(command: string): Promise<void> {
   console.log(`Executing: ${command}`);
-  execSync(command, { stdio: 'inherit' });
+  await $`${{ raw: command }}`;
 }
 
 async function propagateChanges(baseBranch: string, targetBranch: string): Promise<void> {
@@ -56,15 +56,15 @@ async function propagateChanges(baseBranch: string, targetBranch: string): Promi
     console.log(`\nMerging ${sourceBranch} into ${targetBranch}...`);
     
     // Switch to source branch and pull latest
-    executeGitCommand(`git switch ${sourceBranch}`);
-    executeGitCommand(`git pull`);
+    await executeGitCommand(`git switch ${sourceBranch}`);
+    await executeGitCommand(`git pull`);
     
     // Switch to target branch and pull latest
-    executeGitCommand(`git switch ${targetBranch}`);
-    executeGitCommand(`git pull`);
+    await executeGitCommand(`git switch ${targetBranch}`);
+    await executeGitCommand(`git pull`);
     
     // Merge source into target
-    executeGitCommand(`git merge --no-ff ${sourceBranch}`);
+    await executeGitCommand(`git merge --no-ff ${sourceBranch}`);
   }
   
   console.log(`\nPropagation complete! ${targetBranch} is now up to date.`);
