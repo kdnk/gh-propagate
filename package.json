@@ -3,7 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "bin": {
-    "gh-propagate": "./index.ts"
+    "gp": "./index.ts"
   },
   "scripts": {
     "build": "bun build index.ts --outdir dist --target node",
