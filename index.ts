@@ -10,7 +10,7 @@ interface PullRequest {
 
 async function getPullRequest(branch: string): Promise<PullRequest | null> {
   try {
-    const result = await $`gh pr view --json number,headRefName,baseRefName --head ${branch}`.text();
+    const result = await $`gh pr view --json number,headRefName,baseRefName ${branch}`.text();
     return JSON.parse(result);
   } catch (error) {
     return null;
