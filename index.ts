@@ -65,6 +65,7 @@ async function propagateChanges(baseBranch: string, targetBranch: string): Promi
     
     // Merge source into target
     await executeGitCommand(`git merge --no-ff ${sourceBranch}`);
+    await executeGitCommand(`git push`);
   }
   
   console.log(`\nPropagation complete! ${targetBranch} is now up to date.`);
