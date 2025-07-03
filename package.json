@@ -2,8 +2,16 @@
   "name": "gh-propagate",
   "module": "index.ts",
   "type": "module",
+  "bin": {
+    "gh-propagate": "./index.ts"
+  },
+  "scripts": {
+    "build": "bun build index.ts --outdir dist --target node",
+    "test": "bun test"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
