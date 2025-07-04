@@ -11,7 +11,7 @@
       "dist"
   ],
   "scripts": {
-    "build": "bun build index.ts --compile --target node --outfile dist/gp",
+    "build": "bun build src/index.ts --compile --target node --outfile dist/gp",
     "test": "bun test"
   },
   "devDependencies": {
