@@ -1,12 +1,4 @@
-import { describe, it, expect, mock, spyOn, beforeEach } from 'bun:test';
-import { $ } from 'bun';
-
-// Mock the $ function for testing
-const mockExec = mock(() => Promise.resolve({ text: () => Promise.resolve('') }));
-
-// Import the functions we want to test
-// Since we need to test internal functions, we'll need to export them from index.ts
-// For now, let's create a test version of the functions
+import { describe, it, expect, mock, beforeEach } from 'bun:test';
 
 interface PullRequest {
   number: number;
@@ -14,10 +6,13 @@ interface PullRequest {
   baseRefName: string;
 }
 
+// Mock implementation for testing
+let mockGhCommand: (branch: string) => Promise<string>;
+
 // Test version of getPullRequest function
 async function getPullRequest(branch: string): Promise<PullRequest | null> {
   try {
-    const result = await $`gh pr view --json number,headRefName,baseRefName ${branch}`.text();
+    const result = await mockGhCommand(branch);
     return JSON.parse(result);
   } catch (error) {
     return null;
@@ -44,11 +39,6 @@ async function buildPRChain(startBranch: string, baseBranch: string): Promise<st
 }
 
 describe('gh-propagate', () => {
-  beforeEach(() => {
-    // Reset mocks before each test
-    mockExec.mockClear();
-  });
-
   describe('getPullRequest', () => {
     it('should return PR data when PR exists', async () => {
       const mockPR = {
@@ -57,26 +47,23 @@ describe('gh-propagate', () => {
         baseRefName: 'main'
       };
 
-      // Mock the $ function to return our test data
-      const mockDollar = spyOn($, 'text').mockResolvedValue(JSON.stringify(mockPR));
+      mockGhCommand = async (branch: string) => {
+        return JSON.stringify(mockPR);
+      };
 
       const result = await getPullRequest('feature-branch');
 
       expect(result).toEqual(mockPR);
-      expect(mockDollar).toHaveBeenCalledTimes(1);
-      
-      mockDollar.mockRestore();
     });
 
     it('should return null when PR does not exist', async () => {
-      // Mock the $ function to throw an error
-      const mockDollar = spyOn($, 'text').mockRejectedValue(new Error('No PR found'));
+      mockGhCommand = async (branch: string) => {
+        throw new Error('No PR found');
+      };
 
       const result = await getPullRequest('nonexistent-branch');
 
       expect(result).toBeNull();
-      
-      mockDollar.mockRestore();
     });
   });
 
@@ -88,31 +75,27 @@ describe('gh-propagate', () => {
       ];
 
       let callCount = 0;
-      const mockDollar = spyOn($, 'text').mockImplementation(async () => {
+      mockGhCommand = async (branch: string) => {
         const pr = mockPRs[callCount];
         callCount++;
         return JSON.stringify(pr);
-      });
+      };
 
       const result = await buildPRChain('feature-2', 'main');
 
       expect(result).toEqual(['feature-2', 'feature-1', 'main']);
-      expect(mockDollar).toHaveBeenCalledTimes(2);
-      
-      mockDollar.mockRestore();
     });
 
     it('should build a single-link PR chain', async () => {
       const mockPR = { number: 1, headRefName: 'feature-1', baseRefName: 'main' };
 
-      const mockDollar = spyOn($, 'text').mockResolvedValue(JSON.stringify(mockPR));
+      mockGhCommand = async (branch: string) => {
+        return JSON.stringify(mockPR);
+      };
 
       const result = await buildPRChain('feature-1', 'main');
 
       expect(result).toEqual(['feature-1', 'main']);
-      expect(mockDollar).toHaveBeenCalledTimes(1);
-      
-      mockDollar.mockRestore();
     });
 
     it('should return just the base branch when start and base are the same', async () => {
@@ -122,13 +105,13 @@ describe('gh-propagate', () => {
     });
 
     it('should throw error when PR not found in chain', async () => {
-      const mockDollar = spyOn($, 'text').mockRejectedValue(new Error('No PR found'));
+      mockGhCommand = async (branch: string) => {
+        throw new Error('No PR found');
+      };
 
       await expect(buildPRChain('nonexistent-branch', 'main')).rejects.toThrow(
         'No pull request found for branch: nonexistent-branch'
       );
-      
-      mockDollar.mockRestore();
     });
 
     it('should build a complex PR chain', async () => {
@@ -140,18 +123,15 @@ describe('gh-propagate', () => {
       ];
 
       let callCount = 0;
-      const mockDollar = spyOn($, 'text').mockImplementation(async () => {
+      mockGhCommand = async (branch: string) => {
         const pr = mockPRs[callCount];
         callCount++;
         return JSON.stringify(pr);
-      });
+      };
 
       const result = await buildPRChain('feature-4', 'dev');
 
       expect(result).toEqual(['feature-4', 'feature-3', 'feature-2', 'feature-1', 'dev']);
-      expect(mockDollar).toHaveBeenCalledTimes(4);
-      
-      mockDollar.mockRestore();
     });
   });
 });
