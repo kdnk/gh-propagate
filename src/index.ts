@@ -111,12 +111,16 @@ async function propagateChanges(baseBranch: string, targetBranch: string, dryRun
         const sourceBranch = reversedChain[i];
         const targetBranch = reversedChain[i + 1];
 
+        if (!sourceBranch || !targetBranch) {
+            continue;
+        }
+
         console.log(chalk.blue(`\n🔄 [${i + 1}/${reversedChain.length - 1}] Merging ${chalk.cyan(sourceBranch)} into ${chalk.cyan(targetBranch)}...`));
 
         // Display PR URL for the target branch being merged into
         const targetUrl = prUrls.get(targetBranch);
         if (targetUrl) {
-            console.log(chalk.gray(`PR: ${chalk.underline(targetUrl)}`));
+            console.log(chalk.gray(`   PR: ${chalk.underline(targetUrl)}`));
         }
 
         // Switch to source branch and pull latest
