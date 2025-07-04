@@ -17,6 +17,11 @@ bun install -g gh-propagate
 ## Usage
 
 ```bash
-gp <target-branch> <base-branch> 
+gp <base-branch> <target-branch>
+```
+
+Example:
+```bash
+gp main feature-branch
 ```
 
