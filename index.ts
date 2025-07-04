@@ -8,6 +8,7 @@ interface PullRequest {
   number: number;
   headRefName: string;
   baseRefName: string;
+  url: string;
 }
 
 interface ParsedArgs {
@@ -49,7 +50,7 @@ function parseArguments(args: string[]): ParsedArgs {
 
 async function getPullRequest(branch: string): Promise<PullRequest | null> {
   try {
-    const result = await $`gh pr view --json number,headRefName,baseRefName ${branch}`.text();
+    const result = await $`gh pr view --json number,headRefName,baseRefName,url ${branch}`.text();
     return JSON.parse(result);
   } catch (error) {
     return null;

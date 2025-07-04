@@ -4,6 +4,7 @@ interface PullRequest {
   number: number;
   headRefName: string;
   baseRefName: string;
+  url: string;
 }
 
 // Mock implementation for testing
@@ -44,7 +45,8 @@ describe('gh-propagate', () => {
       const mockPR = {
         number: 123,
         headRefName: 'feature-branch',
-        baseRefName: 'main'
+        baseRefName: 'main',
+        url: 'https://github.com/owner/repo/pull/123'
       };
 
       mockGhCommand = async (branch: string) => {
@@ -70,8 +72,8 @@ describe('gh-propagate', () => {
   describe('buildPRChain', () => {
     it('should build a simple PR chain', async () => {
       const mockPRs = [
-        { number: 2, headRefName: 'feature-2', baseRefName: 'feature-1' },
-        { number: 1, headRefName: 'feature-1', baseRefName: 'main' }
+        { number: 2, headRefName: 'feature-2', baseRefName: 'feature-1', url: 'https://github.com/owner/repo/pull/2' },
+        { number: 1, headRefName: 'feature-1', baseRefName: 'main', url: 'https://github.com/owner/repo/pull/1' }
       ];
 
       let callCount = 0;
@@ -87,7 +89,7 @@ describe('gh-propagate', () => {
     });
 
     it('should build a single-link PR chain', async () => {
-      const mockPR = { number: 1, headRefName: 'feature-1', baseRefName: 'main' };
+      const mockPR = { number: 1, headRefName: 'feature-1', baseRefName: 'main', url: 'https://github.com/owner/repo/pull/1' };
 
       mockGhCommand = async (branch: string) => {
         return JSON.stringify(mockPR);
@@ -116,10 +118,10 @@ describe('gh-propagate', () => {
 
     it('should build a complex PR chain', async () => {
       const mockPRs = [
-        { number: 4, headRefName: 'feature-4', baseRefName: 'feature-3' },
-        { number: 3, headRefName: 'feature-3', baseRefName: 'feature-2' },
-        { number: 2, headRefName: 'feature-2', baseRefName: 'feature-1' },
-        { number: 1, headRefName: 'feature-1', baseRefName: 'dev' }
+        { number: 4, headRefName: 'feature-4', baseRefName: 'feature-3', url: 'https://github.com/owner/repo/pull/4' },
+        { number: 3, headRefName: 'feature-3', baseRefName: 'feature-2', url: 'https://github.com/owner/repo/pull/3' },
+        { number: 2, headRefName: 'feature-2', baseRefName: 'feature-1', url: 'https://github.com/owner/repo/pull/2' },
+        { number: 1, headRefName: 'feature-1', baseRefName: 'dev', url: 'https://github.com/owner/repo/pull/1' }
       ];
 
       let callCount = 0;
