@@ -2,11 +2,42 @@
 
 import { $ } from 'bun';
 import chalk from 'chalk';
+import { parseArgs } from 'util';
 
 interface PullRequest {
   number: number;
   headRefName: string;
   baseRefName: string;
+}
+
+interface ParsedArgs {
+  baseBranch: string;
+  targetBranch: string;
+  dryRun: boolean;
+}
+
+function parseArguments(args: string[]): ParsedArgs {
+  const { values, positionals } = parseArgs({
+    args,
+    options: {
+      'dry-run': {
+        type: 'boolean',
+        short: 'd',
+        default: false,
+      },
+    },
+    allowPositionals: true,
+  });
+  
+  if (positionals.length !== 2) {
+    throw new Error('Expected exactly 2 positional arguments: <base-branch> <target-branch>');
+  }
+  
+  return {
+    baseBranch: positionals[0],
+    targetBranch: positionals[1],
+    dryRun: values['dry-run'] as boolean,
+  };
 }
 
 async function getPullRequest(branch: string): Promise<PullRequest | null> {
@@ -89,33 +120,18 @@ async function propagateChanges(baseBranch: string, targetBranch: string, dryRun
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  
-  // Check for dry run flag
-  const dryRunIndex = args.findIndex(arg => arg === '--dry-run' || arg === '-d');
-  const dryRun = dryRunIndex !== -1;
-  
-  // Remove dry run flag from args
-  if (dryRunIndex !== -1) {
-    args.splice(dryRunIndex, 1);
-  }
-
-  if (args.length !== 2) {
-    console.error(chalk.red('❌ Usage: gh-propagate [--dry-run|-d] <base-branch> <target-branch>'));
-    console.error(chalk.yellow('💡 Example: gh-propagate dev feature-2'));
-    console.error(chalk.yellow('💡 Example: gh-propagate --dry-run dev feature-2'));
-    process.exit(1);
-  }
-
-  const [baseBranch, targetBranch] = args;
-
-  if (!baseBranch || !targetBranch) {
-    console.error(chalk.red('❌ Both base-branch and target-branch are required'));
-    process.exit(1);
-  }
 
   try {
+    const { baseBranch, targetBranch, dryRun } = parseArguments(args);
     await propagateChanges(baseBranch, targetBranch, dryRun);
   } catch (error) {
+    if (error instanceof Error && error.message.includes('Expected exactly 2 positional arguments')) {
+      console.error(chalk.red('❌ Usage: gh-propagate [--dry-run|-d] <base-branch> <target-branch>'));
+      console.error(chalk.yellow('💡 Example: gh-propagate dev feature-2'));
+      console.error(chalk.yellow('💡 Example: gh-propagate --dry-run dev feature-2'));
+      console.error(chalk.yellow('💡 Example: gh-propagate -d dev feature-2'));
+      process.exit(1);
+    }
     console.error(chalk.red('❌ Error:'), error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
