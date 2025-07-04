@@ -7,6 +7,9 @@
   "bin": {
     "gp": "./dist/gp"
   },
+  "files": [
+      "dist"
+  ],
   "scripts": {
     "build": "bun build index.ts --compile --target node --outfile dist/gp",
     "test": "bun test"
