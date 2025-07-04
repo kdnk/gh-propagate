@@ -33,9 +33,16 @@ function parseArguments(args: string[]): ParsedArgs {
     throw new Error('Expected exactly 2 positional arguments: <base-branch> <target-branch>');
   }
   
+  const baseBranch = positionals[0];
+  const targetBranch = positionals[1];
+  
+  if (typeof baseBranch !== 'string' || typeof targetBranch !== 'string') {
+    throw new Error('Both base-branch and target-branch must be provided');
+  }
+  
   return {
-    baseBranch: positionals[0],
-    targetBranch: positionals[1],
+    baseBranch,
+    targetBranch,
     dryRun: values['dry-run'] as boolean,
   };
 }
