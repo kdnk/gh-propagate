@@ -103,7 +103,7 @@ async function propagateChanges(baseBranch: string, targetBranch: string, dryRun
     const sourceBranch = reversedChain[i];
     const targetBranch = reversedChain[i + 1];
 
-    console.log(chalk.blue(`\n🔄 Merging ${chalk.cyan(sourceBranch)} into ${chalk.cyan(targetBranch)}...`));
+    console.log(chalk.blue(`\n🔄 [${i + 1}/${reversedChain.length - 1}] Merging ${chalk.cyan(sourceBranch)} into ${chalk.cyan(targetBranch)}...`));
 
     // Switch to source branch and pull latest
     await executeGitCommand(`git switch ${sourceBranch}`, dryRun);
