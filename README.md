@@ -1,20 +1,22 @@
+[![npm version](https://badge.fury.io/js/gh-propagate.svg)](https://badge.fury.io/js/gh-propagate)
+
 # gh-propagate
 
 ![CleanShot 2025-07-04 at 10 18 46](https://github.com/user-attachments/assets/14080c23-fad9-424a-a24b-f0ea32192b94)
 
+## Prerequisites
 
-[![npm version](https://badge.fury.io/js/gh-propagate.svg)](https://badge.fury.io/js/gh-propagate)
+- GitHub CLI (`gh`) installed and authenticated https://cli.github.com/
 
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
+## Installation
 
 ```bash
-bun run index.ts
+bun install -g gh-propagate
 ```
 
-This project was created using `bun init` in bun v1.2.16. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+## Usage
+
+```bash
+gp <target-branch> <base-branch> 
+```
+
