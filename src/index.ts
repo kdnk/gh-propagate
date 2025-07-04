@@ -120,7 +120,7 @@ async function propagateChanges(baseBranch: string, targetBranch: string, dryRun
         // Display PR URL for the target branch being merged into
         const targetUrl = prUrls.get(targetBranch);
         if (targetUrl) {
-            console.log(chalk.gray(`🔗 PR: ${chalk.underline(targetUrl)}`));
+            console.log(chalk.yellow(`🔗 PR: ${chalk.underline(targetUrl)}`));
         }
 
         // Switch to source branch and pull latest
