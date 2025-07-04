@@ -45,7 +45,10 @@ async function propagateChanges(baseBranch: string, targetBranch: string): Promi
   console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
   const chain = await buildPRChain(targetBranch, baseBranch);
-  console.log(chalk.green(`📋 PR chain: ${chain.map(branch => chalk.yellow(branch)).join(chalk.gray(' ← '))}`));
+  
+  console.log(chalk.green(`\n📋 Branch chain discovered:`));
+  console.log(chalk.yellow(`   ${chain.slice().reverse().map(branch => chalk.cyan(branch)).join(chalk.gray(' ← '))}`));
+  console.log(chalk.gray(`   (${chain.length} branches total)\n`));
 
   // Merge changes in reverse order (from base to target)
   const reversedChain = [...chain].reverse();
