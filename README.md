@@ -17,11 +17,17 @@ bun install -g gh-propagate
 ## Usage
 
 ```bash
-gp <base-branch> <target-branch>
+gp [--dry-run|-d] <base-branch> <target-branch>
 ```
 
-Example:
+Examples:
 ```bash
 gp main feature-branch
+gp --dry-run main feature-branch
+gp -d main feature-branch
 ```
+
+### Options
+
+- `--dry-run`, `-d`: Preview what commands would be executed without making any changes
 
