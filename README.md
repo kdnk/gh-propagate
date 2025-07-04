@@ -1,5 +1,7 @@
 # gh-propagate
 
+https://www.npmjs.com/package/gh-propagate
+
 To install dependencies:
 
 ```bash
