@@ -36,12 +36,16 @@ async function buildPRChain(startBranch: string, baseBranch: string): Promise<st
   return chain;
 }
 
-async function executeGitCommand(command: string): Promise<void> {
-  console.log(chalk.gray(`Executing: ${command}`));
-  await $`${{ raw: command }}`;
+async function executeGitCommand(command: string, dryRun: boolean = false): Promise<void> {
+  if (dryRun) {
+    console.log(chalk.yellow(`[DRY RUN] Would execute: ${command}`));
+  } else {
+    console.log(chalk.gray(`Executing: ${command}`));
+    await $`${{ raw: command }}`;
+  }
 }
 
-async function propagateChanges(baseBranch: string, targetBranch: string): Promise<void> {
+async function propagateChanges(baseBranch: string, targetBranch: string, dryRun: boolean = false): Promise<void> {
   console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
   const chain = await buildPRChain(targetBranch, baseBranch);
@@ -49,6 +53,10 @@ async function propagateChanges(baseBranch: string, targetBranch: string): Promi
   console.log(chalk.green(`\n📋 Branch chain discovered:`));
   console.log(chalk.yellow(`   ${chain.slice().reverse().map(branch => chalk.cyan(branch)).join(chalk.gray(' ← '))}`));
   console.log(chalk.gray(`   (${chain.length} branches total)\n`));
+
+  if (dryRun) {
+    console.log(chalk.yellow(`🔍 DRY RUN MODE: Showing what would be executed without making changes\n`));
+  }
 
   // Merge changes in reverse order (from base to target)
   const reversedChain = [...chain].reverse();
@@ -60,27 +68,41 @@ async function propagateChanges(baseBranch: string, targetBranch: string): Promi
     console.log(chalk.blue(`\n🔄 Merging ${chalk.cyan(sourceBranch)} into ${chalk.cyan(targetBranch)}...`));
 
     // Switch to source branch and pull latest
-    await executeGitCommand(`git switch ${sourceBranch}`);
-    await executeGitCommand(`git pull`);
+    await executeGitCommand(`git switch ${sourceBranch}`, dryRun);
+    await executeGitCommand(`git pull`, dryRun);
 
     // Switch to target branch and pull latest
-    await executeGitCommand(`git switch ${targetBranch}`);
-    await executeGitCommand(`git pull`);
+    await executeGitCommand(`git switch ${targetBranch}`, dryRun);
+    await executeGitCommand(`git pull`, dryRun);
 
     // Merge source into target
-    await executeGitCommand(`git merge --no-ff ${sourceBranch}`);
-    await executeGitCommand(`git push`);
+    await executeGitCommand(`git merge --no-ff ${sourceBranch}`, dryRun);
+    await executeGitCommand(`git push`, dryRun);
   }
 
-  console.log(chalk.green(`\n✅ Propagation complete! ${chalk.cyan(targetBranch)} is now up to date.`));
+  if (dryRun) {
+    console.log(chalk.green(`\n✅ Dry run complete! Above commands would propagate changes to ${chalk.cyan(targetBranch)}.`));
+  } else {
+    console.log(chalk.green(`\n✅ Propagation complete! ${chalk.cyan(targetBranch)} is now up to date.`));
+  }
 }
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
+  
+  // Check for dry run flag
+  const dryRunIndex = args.findIndex(arg => arg === '--dry-run' || arg === '-d');
+  const dryRun = dryRunIndex !== -1;
+  
+  // Remove dry run flag from args
+  if (dryRunIndex !== -1) {
+    args.splice(dryRunIndex, 1);
+  }
 
   if (args.length !== 2) {
-    console.error(chalk.red('❌ Usage: gh-propagate <base-branch> <target-branch>'));
+    console.error(chalk.red('❌ Usage: gh-propagate [--dry-run|-d] <base-branch> <target-branch>'));
     console.error(chalk.yellow('💡 Example: gh-propagate dev feature-2'));
+    console.error(chalk.yellow('💡 Example: gh-propagate --dry-run dev feature-2'));
     process.exit(1);
   }
 
@@ -92,7 +114,7 @@ async function main(): Promise<void> {
   }
 
   try {
-    await propagateChanges(baseBranch, targetBranch);
+    await propagateChanges(baseBranch, targetBranch, dryRun);
   } catch (error) {
     console.error(chalk.red('❌ Error:'), error instanceof Error ? error.message : String(error));
     process.exit(1);
