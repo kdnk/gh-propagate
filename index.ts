@@ -29,18 +29,18 @@ function parseArguments(args: string[]): ParsedArgs {
     },
     allowPositionals: true,
   });
-  
+
   if (positionals.length !== 2) {
     throw new Error('Expected exactly 2 positional arguments: <base-branch> <target-branch>');
   }
-  
+
   const baseBranch = positionals[0];
   const targetBranch = positionals[1];
-  
+
   if (typeof baseBranch !== 'string' || typeof targetBranch !== 'string') {
     throw new Error('Both base-branch and target-branch must be provided');
   }
-  
+
   return {
     baseBranch,
     targetBranch,
@@ -57,8 +57,14 @@ async function getPullRequest(branch: string): Promise<PullRequest | null> {
   }
 }
 
-async function buildPRChain(startBranch: string, baseBranch: string): Promise<string[]> {
-  const chain: string[] = [];
+interface ChainInfo {
+  branches: string[];
+  prUrls: Map<string, string>;
+}
+
+async function buildPRChain(startBranch: string, baseBranch: string): Promise<ChainInfo> {
+  const branches: string[] = [];
+  const prUrls = new Map<string, string>();
   let currentBranch = startBranch;
 
   while (currentBranch !== baseBranch) {
@@ -67,12 +73,13 @@ async function buildPRChain(startBranch: string, baseBranch: string): Promise<st
       throw new Error(`No pull request found for branch: ${currentBranch}`);
     }
 
-    chain.push(currentBranch);
+    branches.push(currentBranch);
+    prUrls.set(currentBranch, pr.url);
     currentBranch = pr.baseRefName;
   }
 
-  chain.push(baseBranch);
-  return chain;
+  branches.push(baseBranch);
+  return { branches, prUrls };
 }
 
 async function executeGitCommand(command: string, dryRun: boolean = false): Promise<void> {
@@ -87,24 +94,30 @@ async function executeGitCommand(command: string, dryRun: boolean = false): Prom
 async function propagateChanges(baseBranch: string, targetBranch: string, dryRun: boolean = false): Promise<void> {
   console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
-  const chain = await buildPRChain(targetBranch, baseBranch);
-  
+  const { branches, prUrls } = await buildPRChain(targetBranch, baseBranch);
+
   console.log(chalk.green(`\n📋 Branch chain discovered:`));
-  console.log(chalk.yellow(`   ${chain.slice().reverse().map(branch => chalk.cyan(branch)).join(chalk.gray(' ← '))}`));
-  console.log(chalk.gray(`   (${chain.length} branches total)\n`));
+  console.log(chalk.yellow(`   ${branches.slice().reverse().map(branch => chalk.cyan(branch)).join(chalk.gray(' ← '))}`));
+  console.log(chalk.gray(`   (${branches.length} branches total)\n`));
 
   if (dryRun) {
     console.log(chalk.yellow(`🔍 DRY RUN MODE: Showing what would be executed without making changes\n`));
   }
 
   // Merge changes in reverse order (from base to target)
-  const reversedChain = [...chain].reverse();
+  const reversedChain = [...branches].reverse();
 
   for (let i = 0; i < reversedChain.length - 1; i++) {
     const sourceBranch = reversedChain[i];
     const targetBranch = reversedChain[i + 1];
 
     console.log(chalk.blue(`\n🔄 [${i + 1}/${reversedChain.length - 1}] Merging ${chalk.cyan(sourceBranch)} into ${chalk.cyan(targetBranch)}...`));
+
+    // Display PR URL for the target branch being merged into
+    const targetUrl = prUrls.get(targetBranch);
+    if (targetUrl) {
+      console.log(chalk.gray(`   PR: ${chalk.underline(targetUrl)}`));
+    }
 
     // Switch to source branch and pull latest
     await executeGitCommand(`git switch ${sourceBranch}`, dryRun);
