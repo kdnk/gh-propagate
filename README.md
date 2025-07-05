@@ -10,6 +10,8 @@ A command-line tool for propagating changes through a chain of pull requests.
 
 `gh-propagate` automatically merges changes through sequential pull requests, maintaining the proper order of dependencies. This is particularly useful when working with stacked pull requests where changes need to be propagated from base branches to target branches.
 
+![image](https://github.com/user-attachments/assets/1a595aaf-cdd7-4019-9141-6b41c7d1046d)
+
 ## How It Works
 
 The tool discovers the chain of pull requests by traversing from your target branch back to the base branch using GitHub CLI (`gh`), then merges changes in reverse order to ensure proper propagation.
