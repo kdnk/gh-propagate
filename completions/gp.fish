@@ -30,6 +30,6 @@ end
 function __fish_gp_branches
     # Only show branches if we're in a git repository
     if git rev-parse --git-dir >/dev/null 2>&1
-        git branch --all 2>/dev/null | sed 's/^[\* ] *//' | sed 's/^remotes\/origin\///' | sort -u
+        git branch --all 2>/dev/null | sed 's/^[\* ] *//' | sed 's/^remotes\/origin\///' | grep -v '^HEAD ->' | sort -u
     end
 end
