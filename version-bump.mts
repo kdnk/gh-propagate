@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { readFileSync, writeFileSync } from 'fs';
+import { $ } from 'bun';
 
 const version = process.env.npm_package_version;
 if (!version) {
@@ -13,3 +14,7 @@ const updated = src.replace(/\.version\('\d+\.\d+\.\d+'\)/, `.version('${version
 
 writeFileSync('src/index.ts', updated);
 console.log(`Updated commander version to ${version}`);
+
+// Add the updated file to git
+await $`git add src/index.ts`;
+console.log('Added src/index.ts to git');
