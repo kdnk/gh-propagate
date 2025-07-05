@@ -8,7 +8,8 @@
     "gp": "./dist/gp"
   },
   "files": [
-    "dist"
+    "dist",
+    "completions"
   ],
   "scripts": {
     "build": "bun build src/index.ts --compile --target node --outfile dist/gp",

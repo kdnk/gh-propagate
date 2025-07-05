@@ -10,9 +10,22 @@
 
 ## Installation
 
+### Using npm/bun (Global)
 ```bash
+# Using bun
 bun install -g gh-propagate
+
+# Using npm
+npm install -g gh-propagate
 ```
+
+### Using Fisher (Fish shell completions)
+```bash
+# Install Fish shell completions only
+fisher install kdnk/gh-propagate
+```
+
+This adds Fish shell completions with tab completion for branch names. You still need to install the `gh-propagate` tool separately using npm or bun.
 
 ## Usage
 
