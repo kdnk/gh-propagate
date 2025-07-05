@@ -68,7 +68,15 @@ async function propagateChanges(baseBranch: string, targetBranch: string, dryRun
     const { branches, prUrls } = await buildPRChain(targetBranch, baseBranch);
 
     console.log(chalk.green(`\n📋 Branch chain discovered:`));
-    console.log(chalk.yellow(`   ${branches.slice().reverse().map(branch => chalk.cyan(branch)).join(chalk.gray(' ← '))}`));
+    console.log(
+        chalk.yellow(
+            `   ${branches
+                .slice()
+                .reverse()
+                .map((branch) => chalk.cyan(branch))
+                .join(chalk.gray(' ← '))}`
+        )
+    );
     console.log(chalk.gray(`   (${branches.length} branches total)\n`));
 
     if (dryRun) {
@@ -86,7 +94,11 @@ async function propagateChanges(baseBranch: string, targetBranch: string, dryRun
             continue;
         }
 
-        console.log(chalk.blue(`\n🔄 [${i + 1}/${reversedChain.length - 1}] Merging ${chalk.cyan(sourceBranch)} into ${chalk.cyan(targetBranch)}...`));
+        console.log(
+            chalk.blue(
+                `\n🔄 [${i + 1}/${reversedChain.length - 1}] Merging ${chalk.cyan(sourceBranch)} into ${chalk.cyan(targetBranch)}...`
+            )
+        );
 
         // Display PR URL for the target branch being merged into
         const targetUrl = prUrls.get(targetBranch);
@@ -108,7 +120,9 @@ async function propagateChanges(baseBranch: string, targetBranch: string, dryRun
     }
 
     if (dryRun) {
-        console.log(chalk.green(`\n✅ Dry run complete! Above commands would propagate changes to ${chalk.cyan(targetBranch)}.`));
+        console.log(
+            chalk.green(`\n✅ Dry run complete! Above commands would propagate changes to ${chalk.cyan(targetBranch)}.`)
+        );
     } else {
         console.log(chalk.green(`\n✅ Propagation complete! ${chalk.cyan(targetBranch)} is now up to date.`));
     }
