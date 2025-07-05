@@ -12,7 +12,8 @@
   ],
   "scripts": {
     "build": "bun build src/index.ts --compile --target node --outfile dist/gp",
-    "test": "bun test"
+    "test": "bun test",
+    "version": "bun version-bump.mts"
   },
   "devDependencies": {
     "@types/bun": "latest",
