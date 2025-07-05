@@ -53,8 +53,11 @@ async function executeGitCommand(command: string, dryRun: boolean = false): Prom
     if (dryRun) {
         console.log(chalk.yellow(`[DRY RUN] Would execute: ${command}`));
     } else {
-        console.log(chalk.gray(`⏳ Executing: ${command}`));
-        await $`${{ raw: command }}`;
+        console.log(chalk.white(`⏳ Executing: ${command}`));
+        const result = await $`${{ raw: command }}`.quiet();
+        if (result.stdout) {
+            console.log(chalk.gray(result.stdout.toString()));
+        }
     }
 }
 
@@ -112,7 +115,7 @@ async function propagateChanges(baseBranch: string, targetBranch: string, dryRun
 
 async function main(): Promise<void> {
     const program = new Command();
-    
+
     program
         .name('gh-propagate')
         .description('Propagate changes through a chain of pull requests')
