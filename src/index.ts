@@ -119,7 +119,7 @@ async function main(): Promise<void> {
     program
         .name('gh-propagate')
         .description('Propagate changes through a chain of pull requests')
-        .version('0.0.12')
+        .version('0.0.13')
         .argument('<base-branch>', 'The base branch to start propagation from')
         .argument('<target-branch>', 'The target branch to propagate changes to')
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)
