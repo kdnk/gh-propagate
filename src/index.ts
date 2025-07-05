@@ -2,7 +2,7 @@
 
 import { $ } from 'bun';
 import chalk from 'chalk';
-import { parseArgs } from 'util';
+import { Command } from 'commander';
 
 interface PullRequest {
     number: number;
@@ -11,41 +11,8 @@ interface PullRequest {
     url: string;
 }
 
-interface ParsedArgs {
-    baseBranch: string;
-    targetBranch: string;
-    dryRun: boolean;
-}
-
-function parseArguments(args: string[]): ParsedArgs {
-    const { values, positionals } = parseArgs({
-        args,
-        options: {
-            'dry-run': {
-                type: 'boolean',
-                short: 'd',
-                default: false,
-            },
-        },
-        allowPositionals: true,
-    });
-
-    if (positionals.length !== 2) {
-        throw new Error('Expected exactly 2 positional arguments: <base-branch> <target-branch>');
-    }
-
-    const baseBranch = positionals[0];
-    const targetBranch = positionals[1];
-
-    if (typeof baseBranch !== 'string' || typeof targetBranch !== 'string') {
-        throw new Error('Both base-branch and target-branch must be provided');
-    }
-
-    return {
-        baseBranch,
-        targetBranch,
-        dryRun: values['dry-run'] as boolean,
-    };
+interface PropagateOptions {
+    dryRun?: boolean;
 }
 
 async function getPullRequest(branch: string): Promise<PullRequest | null> {
@@ -144,22 +111,25 @@ async function propagateChanges(baseBranch: string, targetBranch: string, dryRun
 }
 
 async function main(): Promise<void> {
-    const args = process.argv.slice(2);
+    const program = new Command();
+    
+    program
+        .name('gh-propagate')
+        .description('Propagate changes through a chain of pull requests')
+        .version('0.0.5')
+        .argument('<base-branch>', 'The base branch to start propagation from')
+        .argument('<target-branch>', 'The target branch to propagate changes to')
+        .option('-d, --dry-run', 'Show what would be executed without making changes', false)
+        .action(async (baseBranch: string, targetBranch: string, options: PropagateOptions) => {
+            try {
+                await propagateChanges(baseBranch, targetBranch, options.dryRun);
+            } catch (error) {
+                console.error(chalk.red('❌ Error:'), error instanceof Error ? error.message : String(error));
+                process.exit(1);
+            }
+        });
 
-    try {
-        const { baseBranch, targetBranch, dryRun } = parseArguments(args);
-        await propagateChanges(baseBranch, targetBranch, dryRun);
-    } catch (error) {
-        if (error instanceof Error && error.message.includes('Expected exactly 2 positional arguments')) {
-            console.error(chalk.red('❌ Usage: gh-propagate [--dry-run|-d] <base-branch> <target-branch>'));
-            console.error(chalk.yellow('💡 Example: gh-propagate dev feature-2'));
-            console.error(chalk.yellow('💡 Example: gh-propagate --dry-run dev feature-2'));
-            console.error(chalk.yellow('💡 Example: gh-propagate -d dev feature-2'));
-            process.exit(1);
-        }
-        console.error(chalk.red('❌ Error:'), error instanceof Error ? error.message : String(error));
-        process.exit(1);
-    }
+    await program.parseAsync(process.argv);
 }
 
 main().catch(console.error);
