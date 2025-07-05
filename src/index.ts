@@ -55,9 +55,13 @@ async function executeGitCommand(command: string, dryRun: boolean = false): Prom
     } else {
         console.log(chalk.white(`⏳ Executing: ${command}`));
         const result = await $`${{ raw: command }}`.quiet();
-        if (result.stdout) {
-            console.log(chalk.gray(result.stderr.toString().trim()));
-            console.log(chalk.gray(result.stdout.toString().trim()));
+        const stderr = result.stderr.toString().trim();
+        const stdout = result.stdout.toString().trim();
+        if (stderr) {
+            console.log(chalk.gray(stderr));
+        }
+        if (stdout) {
+            console.log(chalk.gray(stdout));
         }
     }
 }
