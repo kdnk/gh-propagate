@@ -25,7 +25,7 @@ async function main(): Promise<void> {
                 } else {
                     await propagateChanges(baseBranch, targetBranch, {
                         dryRun: options.dryRun,
-                        numberTitles: options.numberTitles
+                        numberTitles: options.numberTitles,
                     });
                 }
             } catch (error) {

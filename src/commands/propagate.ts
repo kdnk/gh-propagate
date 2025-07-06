@@ -4,12 +4,16 @@ import { executeGitCommand } from '../services/git.js';
 import { updatePRTitlesWithNumbers } from '../utils/pr-titles.js';
 import { logChainDiscovery, logMergeStep, logPRUrl, logCompletionMessage } from '../utils/console.js';
 
-export async function propagateChanges(baseBranch: string, targetBranch: string, options: { dryRun?: boolean; numberTitles?: boolean } = {}): Promise<void> {
+export async function propagateChanges(
+    baseBranch: string,
+    targetBranch: string,
+    options: { dryRun?: boolean; numberTitles?: boolean } = {}
+): Promise<void> {
     const { dryRun = false, numberTitles = false } = options;
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
     const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch);
-    
+
     if (numberTitles) {
         await updatePRTitlesWithNumbers(prDetails, branches, baseBranch, dryRun);
     }

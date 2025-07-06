@@ -20,7 +20,10 @@ export async function updatePRTitle(prNumber: number, newTitle: string, dryRun: 
             return true;
         }
     } catch (error) {
-        console.error(`❌ Failed to update PR #${prNumber} title:`, error instanceof Error ? error.message : String(error));
+        console.error(
+            `❌ Failed to update PR #${prNumber} title:`,
+            error instanceof Error ? error.message : String(error)
+        );
         return false;
     }
 }
