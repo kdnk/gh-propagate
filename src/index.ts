@@ -9,15 +9,17 @@ interface PullRequest {
     headRefName: string;
     baseRefName: string;
     url: string;
+    title: string;
 }
 
 interface PropagateOptions {
     dryRun?: boolean;
+    list?: boolean;
 }
 
 async function getPullRequest(branch: string): Promise<PullRequest | null> {
     try {
-        const result = await $`gh pr view --json number,headRefName,baseRefName,url ${branch}`.text();
+        const result = await $`gh pr view --json number,headRefName,baseRefName,url,title ${branch}`.text();
         return JSON.parse(result);
     } catch (error) {
         return null;
@@ -27,11 +29,13 @@ async function getPullRequest(branch: string): Promise<PullRequest | null> {
 interface ChainInfo {
     branches: string[];
     prUrls: Map<string, string>;
+    prDetails: Map<string, PullRequest>;
 }
 
 async function buildPRChain(startBranch: string, baseBranch: string): Promise<ChainInfo> {
     const branches: string[] = [];
     const prUrls = new Map<string, string>();
+    const prDetails = new Map<string, PullRequest>();
     let currentBranch = startBranch;
 
     while (currentBranch !== baseBranch) {
@@ -42,11 +46,12 @@ async function buildPRChain(startBranch: string, baseBranch: string): Promise<Ch
 
         branches.push(currentBranch);
         prUrls.set(currentBranch, pr.url);
+        prDetails.set(currentBranch, pr);
         currentBranch = pr.baseRefName;
     }
 
     branches.push(baseBranch);
-    return { branches, prUrls };
+    return { branches, prUrls, prDetails };
 }
 
 async function executeGitCommand(command: string, dryRun: boolean = false): Promise<void> {
@@ -64,6 +69,34 @@ async function executeGitCommand(command: string, dryRun: boolean = false): Prom
             console.log(chalk.gray(stdout));
         }
     }
+}
+
+async function listPRChain(baseBranch: string, targetBranch: string): Promise<void> {
+    console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
+
+    const { branches, prDetails } = await buildPRChain(targetBranch, baseBranch);
+    
+    // Filter out the base branch since it doesn't have a PR
+    const prBranches = branches.filter(branch => branch !== baseBranch);
+    
+    if (prBranches.length === 0) {
+        console.log(chalk.yellow('No PRs found in chain'));
+        return;
+    }
+
+    console.log(chalk.green(`\n# PR Chain: ${baseBranch} → ${targetBranch}\n`));
+    
+    // Reverse to show from base to target
+    const reversedPRBranches = [...prBranches].reverse();
+    
+    reversedPRBranches.forEach((branch, index) => {
+        const pr = prDetails.get(branch);
+        if (pr) {
+            const position = index + 1;
+            const total = reversedPRBranches.length;
+            console.log(`- [${position}/${total}] #${pr.number}: [${pr.title}](${pr.url})`);
+        }
+    });
 }
 
 async function propagateChanges(baseBranch: string, targetBranch: string, dryRun: boolean = false): Promise<void> {
@@ -142,9 +175,14 @@ async function main(): Promise<void> {
         .argument('<base-branch>', 'The base branch to start propagation from')
         .argument('<target-branch>', 'The target branch to propagate changes to')
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)
+        .option('-l, --list', 'List all PRs in the chain as markdown links', false)
         .action(async (baseBranch: string, targetBranch: string, options: PropagateOptions) => {
             try {
-                await propagateChanges(baseBranch, targetBranch, options.dryRun);
+                if (options.list) {
+                    await listPRChain(baseBranch, targetBranch);
+                } else {
+                    await propagateChanges(baseBranch, targetBranch, options.dryRun);
+                }
             } catch (error) {
                 console.error(chalk.red('❌ Error:'), error instanceof Error ? error.message : String(error));
                 process.exit(1);
