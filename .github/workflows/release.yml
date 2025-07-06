@@ -16,6 +16,10 @@ jobs:
             - run: bun install
             - name: Build
               run: bun run build
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '22.x'
+                  registry-url: 'https://registry.npmjs.org'
             - name: Publish
               run: npm publish --access public --provenance
               env:
