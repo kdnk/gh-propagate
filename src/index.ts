@@ -15,6 +15,7 @@ interface PullRequest {
 interface PropagateOptions {
     dryRun?: boolean;
     list?: boolean;
+    numberTitles?: boolean;
 }
 
 async function getPullRequest(branch: string): Promise<PullRequest | null> {
@@ -71,6 +72,64 @@ async function executeGitCommand(command: string, dryRun: boolean = false): Prom
     }
 }
 
+function removeExistingNumberPrefix(title: string): string {
+    // Remove existing [n/total] prefix if present
+    return title.replace(/^\[\d+\/\d+\]\s*/, '');
+}
+
+function addNumberPrefix(title: string, position: number, total: number): string {
+    const cleanTitle = removeExistingNumberPrefix(title);
+    return `[${position}/${total}] ${cleanTitle}`;
+}
+
+async function updatePRTitle(prNumber: number, newTitle: string, dryRun: boolean = false): Promise<boolean> {
+    try {
+        if (dryRun) {
+            console.log(chalk.yellow(`[DRY RUN] Would update PR #${prNumber} title to: "${newTitle}"`));
+            return true;
+        } else {
+            await $`gh pr edit ${prNumber} --title ${newTitle}`.quiet();
+            return true;
+        }
+    } catch (error) {
+        console.error(chalk.red(`❌ Failed to update PR #${prNumber} title:`, error instanceof Error ? error.message : String(error)));
+        return false;
+    }
+}
+
+async function updatePRTitlesWithNumbers(prDetails: Map<string, PullRequest>, branches: string[], baseBranch: string, dryRun: boolean = false): Promise<void> {
+    const prBranches = branches.filter(branch => branch !== baseBranch);
+    
+    if (prBranches.length === 0) {
+        console.log(chalk.yellow('No PRs found to update'));
+        return;
+    }
+
+    console.log(chalk.blue(`\n🔢 Updating PR titles with sequential numbering...`));
+    
+    const reversedPRBranches = [...prBranches].reverse();
+    const total = reversedPRBranches.length;
+    let successCount = 0;
+    
+    for (let i = 0; i < reversedPRBranches.length; i++) {
+        const branch = reversedPRBranches[i];
+        const pr = prDetails.get(branch);
+        
+        if (pr) {
+            const position = i + 1;
+            const newTitle = addNumberPrefix(pr.title, position, total);
+            
+            const success = await updatePRTitle(pr.number, newTitle, dryRun);
+            if (success) {
+                console.log(chalk.green(`✓ PR #${pr.number}: "${newTitle}"`));
+                successCount++;
+            }
+        }
+    }
+    
+    console.log(chalk.green(`\n✅ Updated ${successCount}/${total} PR titles successfully`));
+}
+
 async function listPRChain(baseBranch: string, targetBranch: string): Promise<void> {
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
@@ -99,10 +158,16 @@ async function listPRChain(baseBranch: string, targetBranch: string): Promise<vo
     });
 }
 
-async function propagateChanges(baseBranch: string, targetBranch: string, dryRun: boolean = false): Promise<void> {
+async function propagateChanges(baseBranch: string, targetBranch: string, options: { dryRun?: boolean; numberTitles?: boolean } = {}): Promise<void> {
+    const { dryRun = false, numberTitles = false } = options;
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
-    const { branches, prUrls } = await buildPRChain(targetBranch, baseBranch);
+    const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch);
+    
+    // Update PR titles with numbers if requested
+    if (numberTitles) {
+        await updatePRTitlesWithNumbers(prDetails, branches, baseBranch, dryRun);
+    }
 
     console.log(chalk.green(`\n📋 Branch chain discovered:`));
     console.log(
@@ -176,12 +241,16 @@ async function main(): Promise<void> {
         .argument('<target-branch>', 'The target branch to propagate changes to')
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)
         .option('-l, --list', 'List all PRs in the chain as markdown links', false)
+        .option('-n, --number-titles', 'Add sequential numbering to PR titles', false)
         .action(async (baseBranch: string, targetBranch: string, options: PropagateOptions) => {
             try {
                 if (options.list) {
                     await listPRChain(baseBranch, targetBranch);
                 } else {
-                    await propagateChanges(baseBranch, targetBranch, options.dryRun);
+                    await propagateChanges(baseBranch, targetBranch, {
+                        dryRun: options.dryRun,
+                        numberTitles: options.numberTitles
+                    });
                 }
             } catch (error) {
                 console.error(chalk.red('❌ Error:'), error instanceof Error ? error.message : String(error));
