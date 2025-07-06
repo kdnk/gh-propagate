@@ -15,7 +15,7 @@
         "completions"
     ],
     "scripts": {
-        "build": "bun build src/index.ts --compile --target node --outfile dist/gp",
+        "build": "bun build src/index.ts --compile --outfile dist/gp",
         "test": "bun test",
         "version": "bun version-bump.mts",
         "format": "prettier --write .",
