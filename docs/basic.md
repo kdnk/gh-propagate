@@ -1,8 +1,8 @@
 gh コマンドを使って、シーケンシャルな pull request を順番に最新の状態にするツールを作ろうと思っています。
 
-
 例えば、dev というベースブランチがあって、dev ← feature-1, feature-1 ← feature-2 という pull request があるとすると、
 `gh-propagate dev feature-2` というコマンドを実行すると、
+
 - gh command を使い、feature-2 の target branch (feature-1) を見つける
 - gh command を使い、feature-1 の target branch (dev) を見つける
 - dev になったので停止
