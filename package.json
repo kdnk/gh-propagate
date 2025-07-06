@@ -4,6 +4,9 @@
     "module": "index.ts",
     "type": "module",
     "author": "Kodai Nakamura",
+    "repository": {
+        "url": "https://github.com/kdnk/gh-propagate"
+    },
     "bin": {
         "gp": "./dist/gp"
     },
