@@ -74,12 +74,20 @@ async function executeGitCommand(command: string, dryRun: boolean = false): Prom
 
 function removeExistingNumberPrefix(title: string): string {
     // Remove existing [n/total] prefix if present
-    return title.replace(/^\[\d+\/\d+\]\s*/, '');
+    return title.replace(/^\[\d+\/\d+\]/, '');
 }
 
 function addNumberPrefix(title: string, position: number, total: number): string {
     const cleanTitle = removeExistingNumberPrefix(title);
-    return `[${position}/${total}] ${cleanTitle}`;
+    const prefix = `[${position}/${total}]`;
+    
+    // If the title starts with brackets (after removing numbering), don't add space
+    if (cleanTitle.startsWith('[')) {
+        return `${prefix}${cleanTitle}`;
+    }
+    
+    // Otherwise, add space
+    return `${prefix} ${cleanTitle}`;
 }
 
 async function updatePRTitle(prNumber: number, newTitle: string, dryRun: boolean = false): Promise<boolean> {
