@@ -8,23 +8,36 @@ Add an option to automatically edit PR attributes with various modifications. Cu
 
 ### Option Name
 
-- `--edit` or `-e`
-- Boolean flag (no argument required)
+- `--edit <operations...>` or `-e <operations...>`
+- Accepts one or more edit operation names as arguments
+- Available operations: `title`, `integration`
 
 ### Behavior
 
-When the `--edit` flag is provided:
+When the `--edit` flag is provided with operations:
 
 1. **Discovery Phase**: Build the PR chain as usual from base branch to target branch
-2. **Edit Operations**: Apply configured edit operations to PRs in the chain
+2. **Validation**: Validate that all specified operations are supported
+3. **Edit Operations**: Apply each specified edit operation to PRs in the chain
 
 ## Current Features
 
-### Title Numbering
+### Title Numbering (`title` operation)
 
 Automatically prefix PR titles with sequential numbers in the format `[n/total]` where `n` is the position in the PR chain and `total` is the total number of PRs in the chain.
 
-**Logic**:
+### Integration PR Description (`integration` operation)
+
+Updates the integration PR (the first PR in the chain that merges into the base branch) with a "PR Chain" section containing markdown links to all PRs in the chain.
+
+**Logic for Integration Operation**:
+
+- Find the integration PR (first PR in chain merging to base branch)
+- Generate a markdown list of all PRs with their numbered positions
+- Add or update a "## PR Chain" section in the integration PR description
+- Include status icons (🔄 for open, ✅ for merged PRs)
+
+**Logic for Title Operation**:
 
 - Number PRs sequentially starting from 1
 - Base PR (closest to main) gets `[1/total]`
@@ -41,7 +54,7 @@ Given a PR chain:
 - PR #124: "Add user management" (base: feature/auth, head: feature/user-mgmt)
 - PR #125: "Add admin dashboard" (base: feature/user-mgmt, head: feature/admin)
 
-After running `gh-propagate main feature/admin --edit`:
+After running `gh-propagate main feature/admin --edit title`:
 
 - PR #123: "[1/3] Add authentication system"
 - PR #124: "[2/3] Add user management"
@@ -55,10 +68,10 @@ Given a PR chain with existing brackets:
 - PR #127: "[bugfix] Fix user validation"
 - PR #128: "Add admin dashboard"
 
-After running `gh-propagate main feature/admin --edit`:
+After running `gh-propagate main feature/admin --edit title`:
 
-- PR #126: "[1/3][feature] Add authentication system"
-- PR #127: "[2/3][bugfix] Fix user validation"
+- PR #126: "[1/3] [feature] Add authentication system"
+- PR #127: "[2/3] [bugfix] Fix user validation"
 - PR #128: "[3/3] Add admin dashboard"
 
 ##### Updating Existing Numbering
@@ -69,7 +82,7 @@ Given a PR chain with existing numbering:
 - PR #130: "[2/2] Add user management"
 - PR #131: "Add admin dashboard"
 
-After running `gh-propagate main feature/admin --edit`:
+After running `gh-propagate main feature/admin --edit title`:
 
 - PR #129: "[1/3] Add authentication system"
 - PR #130: "[2/3] Add user management"
@@ -78,10 +91,10 @@ After running `gh-propagate main feature/admin --edit`:
 ### Implementation Details
 
 1. **Title Processing**:
-    - Check if title already has a number prefix (regex: `^\[\d+/\d+\]`)
+    - Check if title already has a number prefix (regex: `^\[\d+/\d+\]\s*`)
     - If found, replace with new numbering
-    - If title contains other brackets (e.g., `[feature] Add new API`), prepend numbering: `[1/3][feature] Add new API`
-    - If not found, prepend the numbering with a space: `[1/3] Add new API`
+    - Always add a space after the numbering prefix
+    - Result format: `[1/3] Original Title` (regardless of existing brackets)
 
 2. **Error Handling**:
     - If `gh pr edit` fails for any PR, log error but continue with other PRs
@@ -94,20 +107,24 @@ After running `gh-propagate main feature/admin --edit`:
 ### CLI Integration
 
 ```bash
-# Basic usage
-gh-propagate main feature/admin --edit
+# Title numbering only
+gh-propagate main feature/admin --edit title
+
+# Multiple operations
+gh-propagate main feature/admin --edit title integration
 
 # With dry run
-gh-propagate main feature/admin --edit --dry-run
+gh-propagate main feature/admin --edit title --dry-run
 
 # Short form
-gh-propagate main feature/admin -e
+gh-propagate main feature/admin -e title
 ```
 
 ### Output
 
 When PR editing is enabled, display:
 
+**For title operation:**
 ```
 🔢 Updating PR titles with sequential numbering...
 ✓ PR #123: "[1/3] Add authentication system"
@@ -115,6 +132,12 @@ When PR editing is enabled, display:
 ✓ PR #125: "[3/3] Add admin dashboard"
 
 ✅ Updated 3/3 PR titles successfully
+```
+
+**For integration operation:**
+```
+📝 Updating integration PR description with PR chain...
+✓ Updated integration PR #123 description
 ```
 
 ## Technical Implementation
