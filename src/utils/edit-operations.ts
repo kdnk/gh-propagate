@@ -76,25 +76,14 @@ async function updateIntegrationPRDescription(
 ): Promise<void> {
     console.log(chalk.blue(`\n${MESSAGES.UPDATING_INTEGRATION_PR}`));
 
-    // Find the integration branch PR (the one that merges into the base branch)
-    let integrationPR: PullRequest | undefined;
-    const prBranches = branches.filter((branch) => branch !== baseBranch);
-
-    if (prBranches.length === 0) {
-        console.log(chalk.yellow(MESSAGES.NO_PRS_TO_UPDATE));
-        return;
-    }
-
-    // The integration PR is the first one in the chain (closest to base branch)
-    const integrationBranch = prBranches[prBranches.length - 1];
-    if (!integrationBranch) {
-        console.error(chalk.red(MESSAGES.INTEGRATION_BRANCH_NOT_FOUND));
-        return;
-    }
-    integrationPR = prDetails.get(integrationBranch);
-
+    const integrationPR = findIntegrationPR(prDetails, branches, baseBranch);
+    
     if (!integrationPR) {
-        console.error(chalk.red(MESSAGES.INTEGRATION_PR_NOT_FOUND));
+        if (branches.filter((branch) => branch !== baseBranch).length === 0) {
+            console.log(chalk.yellow(MESSAGES.NO_PRS_TO_UPDATE));
+        } else {
+            console.error(chalk.red(MESSAGES.INTEGRATION_PR_NOT_FOUND));
+        }
         return;
     }
 
@@ -165,4 +154,23 @@ function updateDescriptionWithPRList(currentDescription: string, prList: string)
         // Add PR Chain section at the end
         return currentDescription ? `${currentDescription}\n\n${prListSection}` : prListSection;
     }
+}
+
+export function findIntegrationPR(
+    prDetails: Map<string, PullRequest>,
+    branches: string[],
+    baseBranch: string
+): PullRequest | null {
+    // Find the PR that merges directly into the base branch (integration branch)
+    // This is determined by finding which branch in our chain has the baseBranch as its base
+    const prBranches = branches.filter((branch) => branch !== baseBranch);
+    
+    for (const branch of prBranches) {
+        const pr = prDetails.get(branch);
+        if (pr && pr.baseRefName === baseBranch) {
+            return pr;
+        }
+    }
+    
+    return null;
 }

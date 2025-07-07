@@ -2,22 +2,12 @@ import chalk from 'chalk';
 import { buildPRChain } from '../services/pr-chain.js';
 import { sortPRsByMergeDateOrNumber, filterPRsExcludingBaseBranch } from '../utils/pr-sorting.js';
 import { STATUS_ICONS, MESSAGES } from '../constants/index.js';
-import { validateIntegrationBranch } from '../utils/validation.js';
 
 export async function listPRChain(
     baseBranch: string,
     targetBranch: string,
     options: { integration?: boolean } = {}
 ): Promise<void> {
-    // Validate integration branch usage
-    if (options.integration && !validateIntegrationBranch(baseBranch)) {
-        console.error(chalk.red(`${MESSAGES.INVALID_INTEGRATION_BRANCH}: "${baseBranch}"`));
-        console.log(
-            chalk.yellow('Integration mode should not be used with main branches like master, main, dev, etc.')
-        );
-        process.exit(1);
-    }
-
     const { branches, prDetails } = await buildPRChain(targetBranch, baseBranch, options);
 
     const prBranches = branches.filter((branch) => branch !== baseBranch);
