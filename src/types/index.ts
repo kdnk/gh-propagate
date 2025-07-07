@@ -24,7 +24,6 @@ export interface PropagateOptions {
     dryRun?: boolean;
     list?: boolean;
     edit?: EditOperation[];
-    integration?: boolean;
 }
 
 export type EditOperation = 'title' | 'integration';

@@ -19,22 +19,14 @@ async function main(): Promise<void> {
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)
         .option('-l, --list', 'List all PRs in the chain as markdown links', false)
         .option('-e, --edit <operations...>', 'Edit PR attributes. Available: title, integration', [])
-        .option(
-            '-i, --integration',
-            'Treat base-branch as integration branch and include merged PRs in numbering',
-            false
-        )
         .action(async (baseBranch: string, targetBranch: string, options: PropagateOptions) => {
             try {
                 if (options.list) {
-                    await listPRChain(baseBranch, targetBranch, {
-                        integration: options.integration,
-                    });
+                    await listPRChain(baseBranch, targetBranch);
                 } else {
                     await propagateChanges(baseBranch, targetBranch, {
                         dryRun: options.dryRun,
                         edit: options.edit,
-                        integration: options.integration,
                     });
                 }
             } catch (error) {

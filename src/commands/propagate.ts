@@ -7,20 +7,19 @@ import { logChainDiscovery, logMergeStep, logPRUrl, logCompletionMessage } from 
 export async function propagateChanges(
     baseBranch: string,
     targetBranch: string,
-    options: { dryRun?: boolean; edit?: string[]; integration?: boolean } = {}
+    options: { dryRun?: boolean; edit?: string[] } = {}
 ): Promise<void> {
-    const { dryRun = false, edit = [], integration = false } = options;
+    const { dryRun = false, edit = [] } = options;
     
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
-    // If title edit is requested, we need to include merged PRs for proper numbering
-    const needsMergedPRs = integration || edit.includes('title');
+    // Always include merged PRs for accurate PR chain and numbering
     const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, {
-        integration: needsMergedPRs,
+        integration: true,
     });
 
     if (edit.length > 0) {
-        await executeEditOperations(edit, prDetails, branches, baseBranch, dryRun, needsMergedPRs);
+        await executeEditOperations(edit, prDetails, branches, baseBranch, dryRun, true);
     }
 
     logChainDiscovery(branches);
