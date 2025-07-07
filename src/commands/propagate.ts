@@ -7,14 +7,14 @@ import { logChainDiscovery, logMergeStep, logPRUrl, logCompletionMessage } from 
 export async function propagateChanges(
     baseBranch: string,
     targetBranch: string,
-    options: { dryRun?: boolean; numberTitles?: boolean; integration?: boolean } = {}
+    options: { dryRun?: boolean; edit?: boolean; integration?: boolean } = {}
 ): Promise<void> {
-    const { dryRun = false, numberTitles = false, integration = false } = options;
+    const { dryRun = false, edit = false, integration = false } = options;
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
     const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, { integration });
 
-    if (numberTitles) {
+    if (edit) {
         await updatePRTitlesWithNumbers(prDetails, branches, baseBranch, dryRun, integration);
     }
 

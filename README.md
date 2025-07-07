@@ -65,14 +65,16 @@ Examples:
 gh-propagate main feature-branch
 gh-propagate --dry-run main feature-branch
 gh-propagate --list main feature-branch
-gh-propagate --number-titles main feature-branch
+gh-propagate --edit main feature-branch
+gh-propagate --integration --list integration feature-branch
 ```
 
 ### Options
 
 - `--dry-run`, `-d`: Preview what commands would be executed without making any changes
 - `--list`, `-l`: List all PRs in the chain as markdown links
-- `--number-titles`, `-t`: Add sequential numbering to PR titles
+- `--edit`, `-e`: Add sequential numbering to PR titles
+- `--integration`, `-i`: Treat base-branch as integration branch and include merged PRs in numbering
 
 ## What It Does
 

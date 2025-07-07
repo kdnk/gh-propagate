@@ -9,7 +9,7 @@ export interface PullRequest {
 export interface PropagateOptions {
     dryRun?: boolean;
     list?: boolean;
-    numberTitles?: boolean;
+    edit?: boolean;
     integration?: boolean;
 }
 
