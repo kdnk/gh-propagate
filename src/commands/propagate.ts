@@ -10,7 +10,7 @@ export async function propagateChanges(
     options: { dryRun?: boolean; edit?: string[] } = {}
 ): Promise<void> {
     const { dryRun = false, edit = [] } = options;
-    
+
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
     // Always include merged PRs for accurate PR chain and numbering
@@ -23,7 +23,6 @@ export async function propagateChanges(
     if (edit.length > 0) {
         await executeEditOperations(edit, prDetails, branches, baseBranch, dryRun, true);
     }
-
 
     if (dryRun) {
         console.log(chalk.yellow(`🔍 DRY RUN MODE: Showing what would be executed without making changes\n`));

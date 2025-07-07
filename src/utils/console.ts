@@ -11,7 +11,7 @@ export function logChainDiscovery(branches: string[]): void {
                 .join(chalk.gray(' ← '))}`
         )
     );
-    console.log(chalk.gray(`   (${branches.length} branches total)\n`));
+    console.log(chalk.gray(`   (${branches.length} branches total)`));
 }
 
 export function logMergeStep(index: number, total: number, sourceBranch: string, targetBranch: string): void {

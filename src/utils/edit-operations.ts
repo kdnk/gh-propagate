@@ -26,7 +26,7 @@ export async function executeEditOperations(
         return;
     }
 
-    console.log(chalk.blue(`\n${MESSAGES.EXECUTING_EDIT_OPERATIONS}: ${operations.join(', ')}...`));
+    console.log(chalk.blue(`\n${MESSAGES.EXECUTING_EDIT_OPERATIONS} (${operations.join(', ')})...`));
 
     for (const operation of operations) {
         await executeEditOperation(
@@ -77,7 +77,7 @@ async function updateIntegrationPRDescription(
     console.log(chalk.blue(`\n${MESSAGES.UPDATING_INTEGRATION_PR}`));
 
     const integrationPR = findIntegrationPR(prDetails, branches, baseBranch);
-    
+
     if (!integrationPR) {
         if (branches.filter((branch) => branch !== baseBranch).length === 0) {
             console.log(chalk.yellow(MESSAGES.NO_PRS_TO_UPDATE));
@@ -96,7 +96,7 @@ async function updateIntegrationPRDescription(
 
     const success = await updatePRDescription(integrationPR.number, newDescription, dryRun);
     if (success) {
-        console.log(chalk.green(`✓ Updated integration PR #${integrationPR.number} description`));
+        console.log(chalk.green(`✅ Updated integration PR #${integrationPR.number} description`));
     }
 }
 
@@ -155,12 +155,12 @@ function updateDescriptionWithPRList(currentDescription: string, prList: string)
             inPRsSection = true;
             continue; // Skip this line
         }
-        
+
         // Check if this line starts a new section (ends PRs section)
         if (line.match(/^## .+/) || line.match(/^# .+/)) {
             inPRsSection = false;
         }
-        
+
         // Keep lines that are not in PRs section
         if (!inPRsSection) {
             filteredLines.push(line);
@@ -182,14 +182,14 @@ export function findIntegrationPR(
     // Find the PR that merges directly into the base branch (integration branch)
     // This is determined by finding which branch in our chain has the baseBranch as its base
     const prBranches = branches.filter((branch) => branch !== baseBranch);
-    
+
     for (const branch of prBranches) {
         const pr = prDetails.get(branch);
         if (pr && pr.baseRefName === baseBranch) {
-            console.log(`🔍 Found integration branch: ${branch} (PR #${pr.number})`);
+            console.log(chalk.green(`✅ Found integration branch: ${branch} (PR #${pr.number})`));
             return pr;
         }
     }
-    
+
     return null;
 }

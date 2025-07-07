@@ -74,8 +74,8 @@ gh-propagate --edit title,integration main feature-branch
 - `--dry-run`, `-d`: Preview what commands would be executed without making any changes
 - `--list`, `-l`: List all PRs in the chain as markdown links with status icons
 - `--edit <operations>`, `-e <operations>`: Apply edit operations to PRs. Available operations:
-  - `title`: Add sequential numbering to PR titles in `[n/total]` format
-  - `integration`: Update integration PR description with PR list
+    - `title`: Add sequential numbering to PR titles in `[n/total]` format
+    - `integration`: Update integration PR description with PR list
 - `--version`, `-v`: Show version information
 
 ## Features
@@ -84,12 +84,12 @@ gh-propagate --edit title,integration main feature-branch
 
 1. **PR Chain Discovery**: Automatically discovers the chain of pull requests using `gh pr view --json number,headRefName,baseRefName --head <branch>`
 2. **Sequential Merging**: Merges changes in reverse order (base → target) with proper git operations:
-   - `git switch <source-branch>`
-   - `git pull`
-   - `git switch <target-branch>`
-   - `git pull`
-   - `git merge --no-ff <source-branch>`
-   - `git push`
+    - `git switch <source-branch>`
+    - `git pull`
+    - `git switch <target-branch>`
+    - `git pull`
+    - `git merge --no-ff <source-branch>`
+    - `git push`
 3. **Integration Branch Detection**: Automatically detects integration branches and includes merged PRs in operations
 
 ### Edit Operations
@@ -138,6 +138,7 @@ gh-propagate --edit title --dry-run main feature-branch
 ### Output Examples
 
 **List output:**
+
 ```
 - [1/3] ✅ #123: [Add authentication system](https://github.com/user/repo/pull/123)
 - [2/3] 🔄 #124: [Add user management](https://github.com/user/repo/pull/124)
@@ -145,8 +146,9 @@ gh-propagate --edit title --dry-run main feature-branch
 ```
 
 **Title numbering output:**
+
 ```
-🔢 Updating PR titles with sequential numbering...
+🔄 Updating PR titles with sequential numbering...
 ✓ PR #123: "[1/3] Add authentication system"
 ✓ PR #124: "[2/3] Add user management"
 ✓ PR #125: "[3/3] Add admin dashboard"

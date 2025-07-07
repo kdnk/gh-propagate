@@ -24,9 +24,9 @@ export const STATUS_ICONS = {
 export const MESSAGES = {
     NO_PRS_FOUND: 'No PRs found in chain',
     NO_PRS_TO_UPDATE: 'No PRs found to update',
-    UPDATING_PR_TITLES: '🔢 Updating PR titles with sequential numbering...',
-    EXECUTING_EDIT_OPERATIONS: '🛠️  Executing edit operations',
-    UPDATING_INTEGRATION_PR: '📝 Updating integration PR description with PR chain...',
+    UPDATING_PR_TITLES: '🔄 Updating PR titles with sequential numbering...',
+    EXECUTING_EDIT_OPERATIONS: '🔄 Editing PRs',
+    UPDATING_INTEGRATION_PR: '🔄 Updating integration PR description with PR chain...',
     INTEGRATION_PR_NOT_FOUND: '❌ Could not find integration PR',
     INTEGRATION_BRANCH_NOT_FOUND: '❌ Could not find integration branch',
     INVALID_EDIT_OPERATIONS: '❌ Invalid edit operations',

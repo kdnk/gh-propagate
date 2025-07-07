@@ -67,13 +67,13 @@ async function updatePRTitlesInIntegrationMode(
 
             const success = await updatePRTitle(pr.number, newTitle, dryRun);
             if (success) {
-                console.log(chalk.green(`✓ PR #${pr.number}: "${newTitle}"`));
+                console.log(chalk.green(`✅ PR #${pr.number}: "${newTitle}"`));
                 successCount++;
             }
         }
     }
 
-    console.log(chalk.green(`\n✅ Updated ${successCount}/${total} PR titles successfully`));
+    console.log(chalk.green(`✅ Updated ${successCount}/${total} PR titles successfully`));
 }
 
 async function updatePRTitlesInNormalMode(
@@ -96,11 +96,11 @@ async function updatePRTitlesInNormalMode(
 
             const success = await updatePRTitle(pr.number, newTitle, dryRun);
             if (success) {
-                console.log(chalk.green(`✓ PR #${pr.number}: "${newTitle}"`));
+                console.log(chalk.green(`✅ PR #${pr.number}: "${newTitle}"`));
                 successCount++;
             }
         }
     }
 
-    console.log(chalk.green(`\n✅ Updated ${successCount}/${total} PR titles successfully`));
+    console.log(chalk.green(`✅ Updated ${successCount}/${total} PR titles successfully`));
 }

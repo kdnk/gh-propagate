@@ -128,19 +128,18 @@ When PR editing is enabled, display:
 **For title operation:**
 
 ```
-🔢 Updating PR titles with sequential numbering...
-✓ PR #123: "[1/3] Add authentication system"
-✓ PR #124: "[2/3] Add user management"
-✓ PR #125: "[3/3] Add admin dashboard"
-
+🔄 Updating PR titles with sequential numbering...
+🚧 PR #123: "[1/3] Add authentication system"
+🚧 PR #124: "[2/3] Add user management"
+🚧 PR #125: "[3/3] Add admin dashboard"
 ✅ Updated 3/3 PR titles successfully
 ```
 
 **For integration operation:**
 
 ```
-📝 Updating integration PR description with PR list...
-✓ Updated integration PR #123 description
+🔄 Updating integration PR description with PR list...
+✅ Updated integration PR #123 description
 ```
 
 #### Integration Operation Examples
@@ -160,6 +159,7 @@ If the integration PR has no existing description, a new "## PRs" section is add
 If the integration PR already has a "## PRs" section, it is completely replaced:
 
 Before:
+
 ```markdown
 This is the main PR for the feature.
 
@@ -169,10 +169,12 @@ This is the main PR for the feature.
 - [2/2] 🔄 #124
 
 ## Additional Notes
+
 Some other content.
 ```
 
 After:
+
 ```markdown
 This is the main PR for the feature.
 
@@ -183,6 +185,7 @@ This is the main PR for the feature.
 - [3/3] 🔄 #125
 
 ## Additional Notes
+
 Some other content.
 ```
 

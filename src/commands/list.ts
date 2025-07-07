@@ -3,10 +3,7 @@ import { buildPRChain } from '../services/pr-chain.js';
 import { sortPRsByMergeDateOrNumber, filterPRsExcludingBaseBranch } from '../utils/pr-sorting.js';
 import { STATUS_ICONS, MESSAGES } from '../constants/index.js';
 
-export async function listPRChain(
-    baseBranch: string,
-    targetBranch: string
-): Promise<void> {
+export async function listPRChain(baseBranch: string, targetBranch: string): Promise<void> {
     // Always use integration mode for accurate PR listing
     const { branches, prDetails } = await buildPRChain(targetBranch, baseBranch, { integration: true });
 
