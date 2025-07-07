@@ -10,6 +10,17 @@ export async function getPullRequest(branch: string): Promise<PullRequest | null
     }
 }
 
+export async function getMergedPRs(baseBranch: string): Promise<PullRequest[]> {
+    try {
+        const result = await $`gh pr list --state merged --base ${baseBranch} --json number,headRefName,baseRefName,url,title,mergedAt`.text();
+        const prs = JSON.parse(result);
+        return prs.sort((a: any, b: any) => new Date(a.mergedAt).getTime() - new Date(b.mergedAt).getTime());
+    } catch (error) {
+        console.error('Failed to get merged PRs:', error);
+        return [];
+    }
+}
+
 export async function updatePRTitle(prNumber: number, newTitle: string, dryRun: boolean = false): Promise<boolean> {
     try {
         if (dryRun) {

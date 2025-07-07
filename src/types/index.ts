@@ -10,6 +10,7 @@ export interface PropagateOptions {
     dryRun?: boolean;
     list?: boolean;
     numberTitles?: boolean;
+    integration?: boolean;
 }
 
 export interface ChainInfo {

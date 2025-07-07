@@ -18,14 +18,18 @@ async function main(): Promise<void> {
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)
         .option('-l, --list', 'List all PRs in the chain as markdown links', false)
         .option('-t, --number-titles', 'Add sequential numbering to PR titles', false)
+        .option('-i, --integration', 'Treat base-branch as integration branch and include merged PRs in numbering', false)
         .action(async (baseBranch: string, targetBranch: string, options: PropagateOptions) => {
             try {
                 if (options.list) {
-                    await listPRChain(baseBranch, targetBranch);
+                    await listPRChain(baseBranch, targetBranch, {
+                        integration: options.integration,
+                    });
                 } else {
                     await propagateChanges(baseBranch, targetBranch, {
                         dryRun: options.dryRun,
                         numberTitles: options.numberTitles,
+                        integration: options.integration,
                     });
                 }
             } catch (error) {
