@@ -142,18 +142,36 @@ function buildPRListMarkdown(
 }
 
 function updateDescriptionWithPRList(currentDescription: string, prList: string): string {
-    const prListSection = `## PR Chain\n\n${prList}`;
+    const prListSection = `## PRs\n\n${prList}`;
 
-    // Check if PR Chain section already exists
-    const prChainRegex = /## PR Chain\n\n[\s\S]*?(?=\n## |\n# |$)/;
+    // Split the description into lines for more precise processing
+    const lines = currentDescription.split('\n');
+    const filteredLines: string[] = [];
+    let inPRsSection = false;
 
-    if (prChainRegex.test(currentDescription)) {
-        // Replace existing PR Chain section
-        return currentDescription.replace(prChainRegex, prListSection);
-    } else {
-        // Add PR Chain section at the end
-        return currentDescription ? `${currentDescription}\n\n${prListSection}` : prListSection;
+    for (const line of lines) {
+        // Check if this line starts a PRs section
+        if (line.match(/^## PRs\s*$/)) {
+            inPRsSection = true;
+            continue; // Skip this line
+        }
+        
+        // Check if this line starts a new section (ends PRs section)
+        if (line.match(/^## .+/) || line.match(/^# .+/)) {
+            inPRsSection = false;
+        }
+        
+        // Keep lines that are not in PRs section
+        if (!inPRsSection) {
+            filteredLines.push(line);
+        }
     }
+
+    // Join the remaining lines and trim
+    const cleanedDescription = filteredLines.join('\n').trim();
+
+    // Add new PRs section at the end
+    return cleanedDescription ? `${cleanedDescription}\n\n${prListSection}` : prListSection;
 }
 
 export function findIntegrationPR(

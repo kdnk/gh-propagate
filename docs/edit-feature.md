@@ -35,6 +35,7 @@ Updates the integration PR (the first PR in the chain that merges into the base 
 - Find the integration PR (first PR in chain merging to base branch)
 - Generate a markdown list of all PRs with their numbered positions
 - Add or update a "## PRs" section in the integration PR description
+- If "## PRs" section already exists, replace it completely with the new content
 - Include status icons (🔄 for open, ✅ for merged PRs)
 
 **Logic for Title Operation**:
@@ -138,8 +139,51 @@ When PR editing is enabled, display:
 **For integration operation:**
 
 ```
-📝 Updating integration PR description with PR chain...
+📝 Updating integration PR description with PR list...
 ✓ Updated integration PR #123 description
+```
+
+#### Integration Operation Examples
+
+**Adding PR list to empty description:**
+If the integration PR has no existing description, a new "## PRs" section is added:
+
+```markdown
+## PRs
+
+- [1/3] ✅ #123: [Add authentication system](https://github.com/user/repo/pull/123)
+- [2/3] 🔄 #124: [Add user management](https://github.com/user/repo/pull/124)
+- [3/3] 🔄 #125: [Add admin dashboard](https://github.com/user/repo/pull/125)
+```
+
+**Updating existing PR list:**
+If the integration PR already has a "## PRs" section, it is completely replaced:
+
+Before:
+```markdown
+This is the main PR for the feature.
+
+## PRs
+
+- [1/2] ✅ #123: [Old PR list](https://github.com/user/repo/pull/123)
+- [2/2] 🔄 #124: [Outdated entries](https://github.com/user/repo/pull/124)
+
+## Additional Notes
+Some other content.
+```
+
+After:
+```markdown
+This is the main PR for the feature.
+
+## PRs
+
+- [1/3] ✅ #123: [Add authentication system](https://github.com/user/repo/pull/123)
+- [2/3] 🔄 #124: [Add user management](https://github.com/user/repo/pull/124)
+- [3/3] 🔄 #125: [Add admin dashboard](https://github.com/user/repo/pull/125)
+
+## Additional Notes
+Some other content.
 ```
 
 ## Technical Implementation
