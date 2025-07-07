@@ -28,15 +28,16 @@ Automatically prefix PR titles with sequential numbers in the format `[n/total]`
 
 ### Integration PR Description (`integration` operation)
 
-Updates the integration PR (the first PR in the chain that merges into the base branch) with a "PR Chain" section containing markdown links to all PRs in the chain.
+Updates the integration PR (the first PR in the chain that merges into the base branch) with a "## PRs" section containing a simplified list of all PRs in the chain with status icons but no links.
 
 **Logic for Integration Operation**:
 
 - Find the integration PR (first PR in chain merging to base branch)
-- Generate a markdown list of all PRs with their numbered positions
+- Generate a simplified list of all PRs with their numbered positions and status icons
 - Add or update a "## PRs" section in the integration PR description
 - If "## PRs" section already exists, replace it completely with the new content
 - Include status icons (🔄 for open, ✅ for merged PRs)
+- Format: `- [position/total] statusIcon #number` (no links in description)
 
 **Logic for Title Operation**:
 
@@ -129,9 +130,9 @@ When PR editing is enabled, display:
 
 ```
 🔄 Updating PR titles with sequential numbering...
-🚧 PR #123: "[1/3] Add authentication system"
-🚧 PR #124: "[2/3] Add user management"
-🚧 PR #125: "[3/3] Add admin dashboard"
+✅ PR #123: "[1/3] Add authentication system"
+✅ PR #124: "[2/3] Add user management"
+✅ PR #125: "[3/3] Add admin dashboard"
 ✅ Updated 3/3 PR titles successfully
 ```
 

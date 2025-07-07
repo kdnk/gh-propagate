@@ -14,7 +14,7 @@ A command-line tool for propagating changes through a chain of pull requests wit
 
 ## How It Works
 
-The tool discovers the chain of pull requests by traversing from your target branch back to the base branch using GitHub CLI (`gh`), then merges changes in reverse order to ensure proper propagation.
+The tool discovers the chain of pull requests by traversing from your target branch back to the base branch using GitHub CLI (`gh`), then merges changes in reverse order to ensure proper propagation. Integration branches are automatically detected and merged PRs are included in all operations.
 
 **Example scenario:**
 
@@ -82,7 +82,7 @@ gh-propagate --edit title,integration main feature-branch
 
 ### Core Functionality
 
-1. **PR Chain Discovery**: Automatically discovers the chain of pull requests using `gh pr view --json number,headRefName,baseRefName --head <branch>`
+1. **PR Chain Discovery**: Automatically discovers the chain of pull requests using `gh pr view --json number,headRefName,baseRefName,url,title,body --head <branch>`
 2. **Sequential Merging**: Merges changes in reverse order (base → target) with proper git operations:
     - `git switch <source-branch>`
     - `git pull`
@@ -90,7 +90,7 @@ gh-propagate --edit title,integration main feature-branch
     - `git pull`
     - `git merge --no-ff <source-branch>`
     - `git push`
-3. **Integration Branch Detection**: Automatically detects integration branches and includes merged PRs in operations
+3. **Integration Branch Detection**: Automatically detects integration branches (PRs that merge directly into base branch) and includes merged PRs in all operations
 
 ### Edit Operations
 
@@ -149,10 +149,9 @@ gh-propagate --edit title --dry-run main feature-branch
 
 ```
 🔄 Updating PR titles with sequential numbering...
-✓ PR #123: "[1/3] Add authentication system"
-✓ PR #124: "[2/3] Add user management"
-✓ PR #125: "[3/3] Add admin dashboard"
-
+✅ PR #123: "[1/3] Add authentication system"
+✅ PR #124: "[2/3] Add user management"
+✅ PR #125: "[3/3] Add admin dashboard"
 ✅ Updated 3/3 PR titles successfully
 ```
 
