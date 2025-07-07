@@ -1,21 +1,21 @@
 import chalk from 'chalk';
 import { buildPRChain } from '../services/pr-chain.js';
 import { executeGitCommand } from '../services/git.js';
-import { updatePRTitlesWithNumbers } from '../utils/pr-titles.js';
+import { executeEditOperations } from '../utils/edit-operations.js';
 import { logChainDiscovery, logMergeStep, logPRUrl, logCompletionMessage } from '../utils/console.js';
 
 export async function propagateChanges(
     baseBranch: string,
     targetBranch: string,
-    options: { dryRun?: boolean; edit?: boolean; integration?: boolean } = {}
+    options: { dryRun?: boolean; edit?: string[]; integration?: boolean } = {}
 ): Promise<void> {
-    const { dryRun = false, edit = false, integration = false } = options;
+    const { dryRun = false, edit = [], integration = false } = options;
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
     const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, { integration });
 
-    if (edit) {
-        await updatePRTitlesWithNumbers(prDetails, branches, baseBranch, dryRun, integration);
+    if (edit.length > 0) {
+        await executeEditOperations(edit, prDetails, branches, baseBranch, dryRun, integration);
     }
 
     logChainDiscovery(branches);

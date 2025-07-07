@@ -4,14 +4,17 @@ export interface PullRequest {
     baseRefName: string;
     url: string;
     title: string;
+    body?: string;
 }
 
 export interface PropagateOptions {
     dryRun?: boolean;
     list?: boolean;
-    edit?: boolean;
+    edit?: string[];
     integration?: boolean;
 }
+
+export type EditOperation = 'titles' | 'integration';
 
 export interface ChainInfo {
     branches: string[];

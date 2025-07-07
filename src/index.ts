@@ -17,8 +17,12 @@ async function main(): Promise<void> {
         .argument('<target-branch>', 'The target branch to propagate changes to')
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)
         .option('-l, --list', 'List all PRs in the chain as markdown links', false)
-        .option('-e, --edit', 'Add sequential numbering to PR titles', false)
-        .option('-i, --integration', 'Treat base-branch as integration branch and include merged PRs in numbering', false)
+        .option('-e, --edit <operations...>', 'Edit PR attributes. Available: titles, integration', [])
+        .option(
+            '-i, --integration',
+            'Treat base-branch as integration branch and include merged PRs in numbering',
+            false
+        )
         .action(async (baseBranch: string, targetBranch: string, options: PropagateOptions) => {
             try {
                 if (options.list) {
