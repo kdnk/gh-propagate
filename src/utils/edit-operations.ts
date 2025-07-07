@@ -86,7 +86,7 @@ async function updateIntegrationPRDescription(
     }
 
     // The integration PR is the first one in the chain (closest to base branch)
-    const integrationBranch = prBranches[0];
+    const integrationBranch = prBranches[prBranches.length - 1];
     if (!integrationBranch) {
         console.error(chalk.red(MESSAGES.INTEGRATION_BRANCH_NOT_FOUND));
         return;

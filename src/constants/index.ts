@@ -20,6 +20,9 @@ export const STATUS_ICONS = {
     OPEN_EMOJI: '🔄',
 } as const;
 
+// Main branches that should not be used as integration branches
+export const MAIN_BRANCHES = ['master', 'main', 'dev', 'develop', 'development'] as const;
+
 // Messages
 export const MESSAGES = {
     NO_PRS_FOUND: 'No PRs found in chain',
@@ -30,4 +33,5 @@ export const MESSAGES = {
     INTEGRATION_PR_NOT_FOUND: '❌ Could not find integration PR',
     INTEGRATION_BRANCH_NOT_FOUND: '❌ Could not find integration branch',
     INVALID_EDIT_OPERATIONS: '❌ Invalid edit operations',
+    INVALID_INTEGRATION_BRANCH: '❌ Cannot use main branch as integration branch',
 } as const;

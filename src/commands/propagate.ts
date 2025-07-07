@@ -3,6 +3,8 @@ import { buildPRChain } from '../services/pr-chain.js';
 import { executeGitCommand } from '../services/git.js';
 import { executeEditOperations } from '../utils/edit-operations.js';
 import { logChainDiscovery, logMergeStep, logPRUrl, logCompletionMessage } from '../utils/console.js';
+import { validateIntegrationBranch } from '../utils/validation.js';
+import { MESSAGES } from '../constants/index.js';
 
 export async function propagateChanges(
     baseBranch: string,
@@ -10,6 +12,16 @@ export async function propagateChanges(
     options: { dryRun?: boolean; edit?: string[]; integration?: boolean } = {}
 ): Promise<void> {
     const { dryRun = false, edit = [], integration = false } = options;
+
+    // Validate integration branch usage
+    if (integration && !validateIntegrationBranch(baseBranch)) {
+        console.error(chalk.red(`${MESSAGES.INVALID_INTEGRATION_BRANCH}: "${baseBranch}"`));
+        console.log(
+            chalk.yellow('Integration mode should not be used with main branches like master, main, dev, etc.')
+        );
+        process.exit(1);
+    }
+
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
     // If title edit is requested, we need to include merged PRs for proper numbering
