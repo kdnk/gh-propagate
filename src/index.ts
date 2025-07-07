@@ -5,6 +5,7 @@ import { Command } from 'commander';
 import type { PropagateOptions } from './types/index.js';
 import { listPRChain } from './commands/list.js';
 import { propagateChanges } from './commands/propagate.js';
+import { VERSION } from './constants/index.js';
 
 async function main(): Promise<void> {
     const program = new Command();
@@ -12,7 +13,7 @@ async function main(): Promise<void> {
     program
         .name('gh-propagate')
         .description('Propagate changes through a chain of pull requests')
-        .version('0.1.7')
+        .version(VERSION)
         .argument('<base-branch>', 'The base branch to start propagation from')
         .argument('<target-branch>', 'The target branch to propagate changes to')
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)

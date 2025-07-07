@@ -5,12 +5,25 @@ export interface PullRequest {
     url: string;
     title: string;
     body?: string;
+    state?: 'open' | 'merged' | 'closed';
+    mergedAt?: string;
 }
+
+export interface OpenPullRequest extends PullRequest {
+    state: 'open';
+}
+
+export interface MergedPullRequest extends PullRequest {
+    state: 'merged';
+    mergedAt: string;
+}
+
+export type PullRequestWithState = OpenPullRequest | MergedPullRequest;
 
 export interface PropagateOptions {
     dryRun?: boolean;
     list?: boolean;
-    edit?: string[];
+    edit?: EditOperation[];
     integration?: boolean;
 }
 
