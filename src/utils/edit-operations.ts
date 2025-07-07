@@ -119,7 +119,7 @@ function buildPRListMarkdown(
                 const position = index + 1;
                 const status = prBranches.includes(pr.headRefName) ? 'open' : 'merged';
                 const statusIcon = status === 'merged' ? STATUS_ICONS.MERGED_EMOJI : STATUS_ICONS.OPEN_EMOJI;
-                return `- [${position}/${total}] ${statusIcon} #${pr.number}: [${pr.title}](${pr.url})`;
+                return `- [${position}/${total}] ${statusIcon} #${pr.number}`;
             })
             .join('\n');
     } else {
@@ -132,7 +132,7 @@ function buildPRListMarkdown(
                 const pr = prDetails.get(branch);
                 if (pr) {
                     const position = index + 1;
-                    return `- [${position}/${total}] ${STATUS_ICONS.OPEN_EMOJI} #${pr.number}: [${pr.title}](${pr.url})`;
+                    return `- [${position}/${total}] ${STATUS_ICONS.OPEN_EMOJI} #${pr.number}`;
                 }
                 return '';
             })

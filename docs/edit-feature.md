@@ -151,9 +151,9 @@ If the integration PR has no existing description, a new "## PRs" section is add
 ```markdown
 ## PRs
 
-- [1/3] ✅ #123: [Add authentication system](https://github.com/user/repo/pull/123)
-- [2/3] 🔄 #124: [Add user management](https://github.com/user/repo/pull/124)
-- [3/3] 🔄 #125: [Add admin dashboard](https://github.com/user/repo/pull/125)
+- [1/3] ✅ #123
+- [2/3] 🔄 #124
+- [3/3] 🔄 #125
 ```
 
 **Updating existing PR list:**
@@ -165,8 +165,8 @@ This is the main PR for the feature.
 
 ## PRs
 
-- [1/2] ✅ #123: [Old PR list](https://github.com/user/repo/pull/123)
-- [2/2] 🔄 #124: [Outdated entries](https://github.com/user/repo/pull/124)
+- [1/2] ✅ #123
+- [2/2] 🔄 #124
 
 ## Additional Notes
 Some other content.
@@ -178,9 +178,9 @@ This is the main PR for the feature.
 
 ## PRs
 
-- [1/3] ✅ #123: [Add authentication system](https://github.com/user/repo/pull/123)
-- [2/3] 🔄 #124: [Add user management](https://github.com/user/repo/pull/124)
-- [3/3] 🔄 #125: [Add admin dashboard](https://github.com/user/repo/pull/125)
+- [1/3] ✅ #123
+- [2/3] 🔄 #124
+- [3/3] 🔄 #125
 
 ## Additional Notes
 Some other content.
