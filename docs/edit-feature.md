@@ -34,7 +34,7 @@ Updates the integration PR (the first PR in the chain that merges into the base 
 
 - Find the integration PR (first PR in chain merging to base branch)
 - Generate a markdown list of all PRs with their numbered positions
-- Add or update a "## PR Chain" section in the integration PR description
+- Add or update a "## PRs" section in the integration PR description
 - Include status icons (🔄 for open, ✅ for merged PRs)
 
 **Logic for Title Operation**:
