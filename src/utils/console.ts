@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 export function logChainDiscovery(branches: string[]): void {
-    console.log(chalk.green(`\n📋 Branch chain discovered:`));
+    console.log(chalk.green(`\n✅ Branch chain discovered:`));
     console.log(
         chalk.yellow(
             `   ${branches
