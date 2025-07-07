@@ -13,7 +13,7 @@ export function addNumberPrefix(title: string, position: number, total: number):
     const prefix = `[${position}/${total}]`;
 
     if (cleanTitle.startsWith('[')) {
-        return `${prefix} ${cleanTitle}`;
+        return `${prefix}${cleanTitle}`;
     }
 
     return `${prefix} ${cleanTitle}`;

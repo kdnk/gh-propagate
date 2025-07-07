@@ -70,8 +70,8 @@ Given a PR chain with existing brackets:
 
 After running `gh-propagate main feature/admin --edit title`:
 
-- PR #126: "[1/3] [feature] Add authentication system"
-- PR #127: "[2/3] [bugfix] Fix user validation"
+- PR #126: "[1/3][feature] Add authentication system"
+- PR #127: "[2/3][bugfix] Fix user validation"
 - PR #128: "[3/3] Add admin dashboard"
 
 ##### Updating Existing Numbering
@@ -93,8 +93,8 @@ After running `gh-propagate main feature/admin --edit title`:
 1. **Title Processing**:
     - Check if title already has a number prefix (regex: `^\[\d+/\d+\]\s*`)
     - If found, replace with new numbering
-    - Always add a space after the numbering prefix
-    - Result format: `[1/3] Original Title` (regardless of existing brackets)
+    - If title contains other brackets (e.g., `[feature] Add new API`), prepend numbering: `[1/3][feature] Add new API`
+    - If not found, prepend the numbering with a space: `[1/3] Add new API`
 
 2. **Error Handling**:
     - If `gh pr edit` fails for any PR, log error but continue with other PRs
@@ -125,6 +125,7 @@ gh-propagate main feature/admin -e title
 When PR editing is enabled, display:
 
 **For title operation:**
+
 ```
 🔢 Updating PR titles with sequential numbering...
 ✓ PR #123: "[1/3] Add authentication system"
@@ -135,6 +136,7 @@ When PR editing is enabled, display:
 ```
 
 **For integration operation:**
+
 ```
 📝 Updating integration PR description with PR chain...
 ✓ Updated integration PR #123 description
