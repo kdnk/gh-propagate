@@ -1,14 +1,17 @@
 # Integration Branch Feature Specification
 
 ## Overview
+
 The `--integration` option treats the first argument (base-branch) as an integration branch, which affects how PR numbering is calculated when used with `-t` or `--list` options.
 
 ## Option Details
+
 - **Option name**: `--integration` / `-i`
 - **Type**: Boolean flag
 - **Default**: `false`
 
 ## Behavior
+
 When the `--integration` option is enabled:
 
 1. **Treats the first argument as an integration branch**: The base-branch parameter is considered an integration branch where PRs are merged sequentially
@@ -29,7 +32,7 @@ gh-propagate --integration --dry-run --number-titles integration feature-branch
 ```
 
 ## Implementation Notes
+
 - The tool should query both open and merged PRs when `--integration` is used
 - Merged PRs should be included in the chain discovery process
 - Sequential numbering should account for the chronological order of PRs in the integration branch
-

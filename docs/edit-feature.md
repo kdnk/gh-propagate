@@ -25,6 +25,7 @@ When the `--edit` flag is provided:
 Automatically prefix PR titles with sequential numbers in the format `[n/total]` where `n` is the position in the PR chain and `total` is the total number of PRs in the chain.
 
 **Logic**:
+
 - Number PRs sequentially starting from 1
 - Base PR (closest to main) gets `[1/total]`
 - Target PR (furthest from main) gets `[total/total]`
@@ -135,22 +136,22 @@ The `--edit` flag is designed to be extensible for future PR editing features:
 ### Potential Future Features
 
 1. **Label Management**:
-   - Add consistent labels to PR chain (e.g., `stack:1`, `stack:2`, `stack:3`)
-   - Remove specific labels from all PRs in chain
-   - Apply priority labels based on position
+    - Add consistent labels to PR chain (e.g., `stack:1`, `stack:2`, `stack:3`)
+    - Remove specific labels from all PRs in chain
+    - Apply priority labels based on position
 
 2. **Description Updates**:
-   - Add chain information to PR descriptions
-   - Link to related PRs in the chain
-   - Add dependency information
+    - Add chain information to PR descriptions
+    - Link to related PRs in the chain
+    - Add dependency information
 
 3. **Milestone Assignment**:
-   - Assign all PRs in chain to the same milestone
-   - Update milestone based on chain position
+    - Assign all PRs in chain to the same milestone
+    - Update milestone based on chain position
 
 4. **Reviewer Assignment**:
-   - Assign consistent reviewers across the chain
-   - Auto-assign based on chain position or file changes
+    - Assign consistent reviewers across the chain
+    - Auto-assign based on chain position or file changes
 
 ### Implementation Strategy
 

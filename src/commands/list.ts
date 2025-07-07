@@ -1,7 +1,11 @@
 import chalk from 'chalk';
 import { buildPRChain } from '../services/pr-chain.js';
 
-export async function listPRChain(baseBranch: string, targetBranch: string, options: { integration?: boolean } = {}): Promise<void> {
+export async function listPRChain(
+    baseBranch: string,
+    targetBranch: string,
+    options: { integration?: boolean } = {}
+): Promise<void> {
     const { branches, prDetails } = await buildPRChain(targetBranch, baseBranch, options);
 
     const prBranches = branches.filter((branch) => branch !== baseBranch);
@@ -15,7 +19,7 @@ export async function listPRChain(baseBranch: string, targetBranch: string, opti
 
     if (options.integration) {
         // In integration mode, show all PRs with proper numbering
-        const allPRs = Array.from(prDetails.values()).filter(pr => pr.headRefName !== baseBranch);
+        const allPRs = Array.from(prDetails.values()).filter((pr) => pr.headRefName !== baseBranch);
         const sortedPRs = allPRs.sort((a, b) => {
             // Sort by merge date if available, otherwise by number
             if ('mergedAt' in a && 'mergedAt' in b) {

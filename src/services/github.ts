@@ -12,7 +12,8 @@ export async function getPullRequest(branch: string): Promise<PullRequest | null
 
 export async function getMergedPRs(baseBranch: string): Promise<PullRequest[]> {
     try {
-        const result = await $`gh pr list --state merged --base ${baseBranch} --json number,headRefName,baseRefName,url,title,mergedAt`.text();
+        const result =
+            await $`gh pr list --state merged --base ${baseBranch} --json number,headRefName,baseRefName,url,title,mergedAt`.text();
         const prs = JSON.parse(result);
         return prs.sort((a: any, b: any) => new Date(a.mergedAt).getTime() - new Date(b.mergedAt).getTime());
     } catch (error) {
@@ -39,7 +40,11 @@ export async function updatePRTitle(prNumber: number, newTitle: string, dryRun: 
     }
 }
 
-export async function updatePRDescription(prNumber: number, newDescription: string, dryRun: boolean = false): Promise<boolean> {
+export async function updatePRDescription(
+    prNumber: number,
+    newDescription: string,
+    dryRun: boolean = false
+): Promise<boolean> {
     try {
         if (dryRun) {
             console.log(`[DRY RUN] Would update PR #${prNumber} description`);

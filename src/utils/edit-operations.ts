@@ -17,8 +17,8 @@ export async function executeEditOperations(
 
     // Validate operations
     const validOperations: EditOperation[] = ['title', 'integration'];
-    const invalidOperations = operations.filter(op => !validOperations.includes(op as EditOperation));
-    
+    const invalidOperations = operations.filter((op) => !validOperations.includes(op as EditOperation));
+
     if (invalidOperations.length > 0) {
         console.error(chalk.red(`❌ Invalid edit operations: ${invalidOperations.join(', ')}`));
         console.log(chalk.yellow(`Valid operations: ${validOperations.join(', ')}`));
@@ -28,7 +28,14 @@ export async function executeEditOperations(
     console.log(chalk.blue(`\n🛠️  Executing edit operations: ${operations.join(', ')}...`));
 
     for (const operation of operations) {
-        await executeEditOperation(operation as EditOperation, prDetails, branches, baseBranch, dryRun, integrationMode);
+        await executeEditOperation(
+            operation as EditOperation,
+            prDetails,
+            branches,
+            baseBranch,
+            dryRun,
+            integrationMode
+        );
     }
 }
 
@@ -64,8 +71,8 @@ async function updateIntegrationPRDescription(
 
     // Find the integration branch PR (the one that merges into the base branch)
     let integrationPR: PullRequest | undefined;
-    const prBranches = branches.filter(branch => branch !== baseBranch);
-    
+    const prBranches = branches.filter((branch) => branch !== baseBranch);
+
     if (prBranches.length === 0) {
         console.log(chalk.yellow('No PRs found to update'));
         return;
@@ -86,7 +93,7 @@ async function updateIntegrationPRDescription(
 
     // Build PR list
     const prList = buildPRListMarkdown(prDetails, branches, baseBranch, integrationMode);
-    
+
     // Get current PR details to read existing description
     const currentDescription = integrationPR.body || '';
     const newDescription = updateDescriptionWithPRList(currentDescription, prList);
@@ -103,11 +110,11 @@ function buildPRListMarkdown(
     baseBranch: string,
     integrationMode: boolean
 ): string {
-    const prBranches = branches.filter(branch => branch !== baseBranch);
-    
+    const prBranches = branches.filter((branch) => branch !== baseBranch);
+
     if (integrationMode) {
         // Include all PRs (open and merged) sorted chronologically
-        const allPRs = Array.from(prDetails.values()).filter(pr => pr.headRefName !== baseBranch);
+        const allPRs = Array.from(prDetails.values()).filter((pr) => pr.headRefName !== baseBranch);
         const sortedPRs = allPRs.sort((a, b) => {
             if ('mergedAt' in a && 'mergedAt' in b) {
                 return new Date(a.mergedAt as string).getTime() - new Date(b.mergedAt as string).getTime();
@@ -116,34 +123,39 @@ function buildPRListMarkdown(
         });
 
         const total = sortedPRs.length;
-        return sortedPRs.map((pr, index) => {
-            const position = index + 1;
-            const status = prBranches.includes(pr.headRefName) ? 'open' : 'merged';
-            const statusIcon = status === 'merged' ? '✅' : '🔄';
-            return `- [${position}/${total}] ${statusIcon} #${pr.number}: [${pr.title}](${pr.url})`;
-        }).join('\n');
+        return sortedPRs
+            .map((pr, index) => {
+                const position = index + 1;
+                const status = prBranches.includes(pr.headRefName) ? 'open' : 'merged';
+                const statusIcon = status === 'merged' ? '✅' : '🔄';
+                return `- [${position}/${total}] ${statusIcon} #${pr.number}: [${pr.title}](${pr.url})`;
+            })
+            .join('\n');
     } else {
         // Only include open PRs in the current chain
         const reversedPRBranches = [...prBranches].reverse();
         const total = reversedPRBranches.length;
-        
-        return reversedPRBranches.map((branch, index) => {
-            const pr = prDetails.get(branch);
-            if (pr) {
-                const position = index + 1;
-                return `- [${position}/${total}] 🔄 #${pr.number}: [${pr.title}](${pr.url})`;
-            }
-            return '';
-        }).filter(line => line !== '').join('\n');
+
+        return reversedPRBranches
+            .map((branch, index) => {
+                const pr = prDetails.get(branch);
+                if (pr) {
+                    const position = index + 1;
+                    return `- [${position}/${total}] 🔄 #${pr.number}: [${pr.title}](${pr.url})`;
+                }
+                return '';
+            })
+            .filter((line) => line !== '')
+            .join('\n');
     }
 }
 
 function updateDescriptionWithPRList(currentDescription: string, prList: string): string {
     const prListSection = `## PR Chain\n\n${prList}`;
-    
+
     // Check if PR Chain section already exists
     const prChainRegex = /## PR Chain\n\n[\s\S]*?(?=\n## |\n# |$)/;
-    
+
     if (prChainRegex.test(currentDescription)) {
         // Replace existing PR Chain section
         return currentDescription.replace(prChainRegex, prListSection);

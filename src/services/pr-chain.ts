@@ -1,7 +1,11 @@
 import type { ChainInfo, PullRequest } from '../types/index.js';
 import { getPullRequest, getMergedPRs } from './github.js';
 
-export async function buildPRChain(startBranch: string, baseBranch: string, options: { integration?: boolean } = {}): Promise<ChainInfo> {
+export async function buildPRChain(
+    startBranch: string,
+    baseBranch: string,
+    options: { integration?: boolean } = {}
+): Promise<ChainInfo> {
     const branches: string[] = [];
     const prUrls = new Map<string, string>();
     const prDetails = new Map<string, PullRequest>();

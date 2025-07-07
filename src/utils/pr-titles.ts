@@ -3,15 +3,15 @@ import type { PullRequest } from '../types/index.js';
 import { updatePRTitle } from '../services/github.js';
 
 export function removeExistingNumberPrefix(title: string): string {
-    return title.replace(/^\[\d+\/\d+\]/, '');
+    return title.replace(/^\[\d+\/\d+\]\s*/, '');
 }
 
 export function addNumberPrefix(title: string, position: number, total: number): string {
-    const cleanTitle = removeExistingNumberPrefix(title);
+    const cleanTitle = removeExistingNumberPrefix(title).trim();
     const prefix = `[${position}/${total}]`;
 
     if (cleanTitle.startsWith('[')) {
-        return `${prefix}${cleanTitle}`;
+        return `${prefix} ${cleanTitle}`;
     }
 
     return `${prefix} ${cleanTitle}`;
@@ -34,12 +34,12 @@ export async function updatePRTitlesWithNumbers(
     console.log(chalk.blue(`\n🔢 Updating PR titles with sequential numbering...`));
 
     const reversedPRBranches = [...prBranches].reverse();
-    
+
     // In integration mode, calculate total including merged PRs
     let total: number;
     if (integration) {
         // Get all PRs excluding the base branch
-        const allPRs = Array.from(prDetails.values()).filter(pr => pr.headRefName !== baseBranch);
+        const allPRs = Array.from(prDetails.values()).filter((pr) => pr.headRefName !== baseBranch);
         total = allPRs.length;
     } else {
         total = reversedPRBranches.length;
@@ -49,7 +49,7 @@ export async function updatePRTitlesWithNumbers(
     // In integration mode, we need to consider merged PRs for proper numbering
     if (integration) {
         // Get all PRs and sort by merge date or creation order
-        const allPRs = Array.from(prDetails.values()).filter(pr => pr.headRefName !== baseBranch);
+        const allPRs = Array.from(prDetails.values()).filter((pr) => pr.headRefName !== baseBranch);
         const sortedPRs = allPRs.sort((a, b) => {
             // Sort by merge date if available, otherwise by number
             if ('mergedAt' in a && 'mergedAt' in b) {
@@ -61,7 +61,7 @@ export async function updatePRTitlesWithNumbers(
         for (let i = 0; i < sortedPRs.length; i++) {
             const pr = sortedPRs[i];
             if (!pr) continue;
-            
+
             // Only update open PRs (those in the current branch chain)
             if (prBranches.includes(pr.headRefName)) {
                 const position = i + 1;

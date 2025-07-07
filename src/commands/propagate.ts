@@ -14,7 +14,9 @@ export async function propagateChanges(
 
     // If title edit is requested, we need to include merged PRs for proper numbering
     const needsMergedPRs = integration || edit.includes('title');
-    const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, { integration: needsMergedPRs });
+    const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, {
+        integration: needsMergedPRs,
+    });
 
     if (edit.length > 0) {
         await executeEditOperations(edit, prDetails, branches, baseBranch, dryRun, needsMergedPRs);
