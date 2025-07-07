@@ -56,20 +56,23 @@ This adds Fish shell completions with tab completion for branch names. You still
 ## Usage
 
 ```bash
-gp [--dry-run|-d] <base-branch> <target-branch>
+gh-propagate [options] <base-branch> <target-branch>
 ```
 
 Examples:
 
 ```bash
-gp main feature-branch
-gp --dry-run main feature-branch
-gp -d main feature-branch
+gh-propagate main feature-branch
+gh-propagate --dry-run main feature-branch
+gh-propagate --list main feature-branch
+gh-propagate --number-titles main feature-branch
 ```
 
 ### Options
 
 - `--dry-run`, `-d`: Preview what commands would be executed without making any changes
+- `--list`, `-l`: List all PRs in the chain as markdown links
+- `--number-titles`, `-t`: Add sequential numbering to PR titles
 
 ## What It Does
 
