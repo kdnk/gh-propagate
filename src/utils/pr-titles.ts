@@ -36,7 +36,14 @@ export async function updatePRTitlesWithNumbers(
     const reversedPRBranches = [...prBranches].reverse();
     
     // In integration mode, calculate total including merged PRs
-    const total = integration ? prDetails.size - 1 : reversedPRBranches.length; // -1 to exclude baseBranch
+    let total: number;
+    if (integration) {
+        // Get all PRs excluding the base branch
+        const allPRs = Array.from(prDetails.values()).filter(pr => pr.headRefName !== baseBranch);
+        total = allPRs.length;
+    } else {
+        total = reversedPRBranches.length;
+    }
     let successCount = 0;
 
     // In integration mode, we need to consider merged PRs for proper numbering

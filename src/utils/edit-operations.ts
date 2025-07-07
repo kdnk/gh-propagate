@@ -16,7 +16,7 @@ export async function executeEditOperations(
     }
 
     // Validate operations
-    const validOperations: EditOperation[] = ['titles', 'integration'];
+    const validOperations: EditOperation[] = ['title', 'integration'];
     const invalidOperations = operations.filter(op => !validOperations.includes(op as EditOperation));
     
     if (invalidOperations.length > 0) {
@@ -41,8 +41,9 @@ async function executeEditOperation(
     integrationMode: boolean
 ): Promise<void> {
     switch (operation) {
-        case 'titles':
-            await updatePRTitlesWithNumbers(prDetails, branches, baseBranch, dryRun, integrationMode);
+        case 'title':
+            // For title operation, always consider merged PRs for proper numbering
+            await updatePRTitlesWithNumbers(prDetails, branches, baseBranch, dryRun, true);
             break;
         case 'integration':
             await updateIntegrationPRDescription(prDetails, branches, baseBranch, dryRun, integrationMode);

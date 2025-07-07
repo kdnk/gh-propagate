@@ -12,10 +12,12 @@ export async function propagateChanges(
     const { dryRun = false, edit = [], integration = false } = options;
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
-    const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, { integration });
+    // If title edit is requested, we need to include merged PRs for proper numbering
+    const needsMergedPRs = integration || edit.includes('title');
+    const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, { integration: needsMergedPRs });
 
     if (edit.length > 0) {
-        await executeEditOperations(edit, prDetails, branches, baseBranch, dryRun, integration);
+        await executeEditOperations(edit, prDetails, branches, baseBranch, dryRun, needsMergedPRs);
     }
 
     logChainDiscovery(branches);
