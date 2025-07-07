@@ -9,12 +9,12 @@ if (!version) {
     process.exit(1);
 }
 
-const src = readFileSync('src/index.ts', 'utf8');
-const updated = src.replace(/\.version\('\d+\.\d+\.\d+'\)/, `.version('${version}')`);
+const src = readFileSync('src/constants/index.ts', 'utf8');
+const updated = src.replace(/export const VERSION = '\d+\.\d+\.\d+';/, `export const VERSION = '${version}';`);
 
-writeFileSync('src/index.ts', updated);
-console.log(`Updated commander version to ${version}`);
+writeFileSync('src/constants/index.ts', updated);
+console.log(`Updated VERSION constant to ${version}`);
 
 // Add the updated file to git
-await $`git add src/index.ts`;
-console.log('Added src/index.ts to git');
+await $`git add src/constants/index.ts`;
+console.log('Added src/constants/index.ts to git');
