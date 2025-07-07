@@ -186,6 +186,7 @@ export function findIntegrationPR(
     for (const branch of prBranches) {
         const pr = prDetails.get(branch);
         if (pr && pr.baseRefName === baseBranch) {
+            console.log(`🔍 Found integration branch: ${branch} (PR #${pr.number})`);
             return pr;
         }
     }

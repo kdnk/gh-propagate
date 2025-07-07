@@ -18,11 +18,12 @@ export async function propagateChanges(
         integration: true,
     });
 
+    logChainDiscovery(branches);
+
     if (edit.length > 0) {
         await executeEditOperations(edit, prDetails, branches, baseBranch, dryRun, true);
     }
 
-    logChainDiscovery(branches);
 
     if (dryRun) {
         console.log(chalk.yellow(`🔍 DRY RUN MODE: Showing what would be executed without making changes\n`));
