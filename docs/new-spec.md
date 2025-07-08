@@ -1,0 +1,6 @@
+- integration branch の自動検出はしないようにしましょう。
+- `gp dev feature-branch` のようにすると、dev から `feature-branch` へ、順にマージします。
+- `gp dev feature-branch --dry-run` で、実際にマージする前に確認できます。
+- `gp integration-branch feature-branch --list` とすると、integration-branch を除いて、マージされる PR の一覧を表示します。このとき、すでにマージされている PR も含めますが、integration-branch に直接マージした PR に限定します。integration-branch に対応する PR が存在しない場合、コマンドを失敗させます。
+- `gp integration-branch feature-branch --edit desc` とすると、integration-branch に対応する PR の説明に、マージされる PR の一覧を追加します。integration-branch に対応する PR が存在しない場合、コマンドを失敗させます。
+- `gp integration-branch feature-branch --edit title` とすると、integration-branch を除く PR のタイトルに、順番を示す `[n/total]` を追加します。integration-branch に対応する PR が存在しない場合、コマンドを失敗させます。

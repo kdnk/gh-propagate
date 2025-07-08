@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import type { PullRequest } from '../types/index.js';
-import { updatePRTitle } from '../services/github.js';
+import { updatePRTitle, getMergedPRs } from '../services/github.js';
 import { sortPRsByMergeDateOrNumber, filterPRsExcludingBaseBranch } from './pr-sorting.js';
 import { PR_NUMBER_PREFIX_PATTERN, MESSAGES } from '../constants/index.js';
 
@@ -22,13 +22,13 @@ export function addNumberPrefix(title: string, position: number, total: number):
 interface UpdateTitlesOptions {
     prDetails: Map<string, PullRequest>;
     branches: string[];
+    integrationBranch: string;
     baseBranch: string;
     dryRun?: boolean;
-    integration?: boolean;
 }
 
 export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): Promise<void> {
-    const { prDetails, branches, baseBranch, dryRun = false, integration = false } = options;
+    const { prDetails, branches, integrationBranch, baseBranch, dryRun = false } = options;
     const prBranches = branches.filter((branch) => branch !== baseBranch);
 
     if (prBranches.length === 0) {
@@ -38,34 +38,40 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
 
     console.log(chalk.blue(`\n${MESSAGES.UPDATING_PR_TITLES}`));
 
-    if (integration) {
-        await updatePRTitlesInIntegrationMode(prDetails, prBranches, baseBranch, dryRun);
-    } else {
-        await updatePRTitlesInNormalMode(prDetails, prBranches, dryRun);
-    }
+    await updatePRTitlesInIntegrationMode(prDetails, prBranches, integrationBranch, baseBranch, dryRun);
 }
 
 async function updatePRTitlesInIntegrationMode(
     prDetails: Map<string, PullRequest>,
     prBranches: string[],
+    integrationBranch: string,
     baseBranch: string,
     dryRun: boolean
 ): Promise<void> {
-    // Find the integration PR (the one that merges directly into base branch)
-    const integrationPR = Array.from(prDetails.values()).find((pr) => pr.baseRefName === baseBranch);
-    const integrationBranchName = integrationPR?.headRefName;
+    // Get merged PRs that target the integration branch
+    const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
 
-    const allPRs = filterPRsExcludingBaseBranch(prDetails, baseBranch);
-    const sortedPRs = sortPRsByMergeDateOrNumber(allPRs);
-    const total = allPRs.length;
+    // Get open PRs that target the integration branch
+    const openPRsToIntegration = Array.from(prDetails.values()).filter((pr) => pr.baseRefName === integrationBranch);
+
+    // Combine open and merged PRs
+    const allIntegrationBranchPRs = [...openPRsToIntegration, ...mergedPRsToIntegration];
+
+    // Remove duplicates (in case a PR appears in both lists)
+    const uniquePRs = allIntegrationBranchPRs.filter(
+        (pr, index, array) => array.findIndex((p) => p.number === pr.number) === index
+    );
+
+    const sortedPRs = sortPRsByMergeDateOrNumber(uniquePRs);
+    const total = sortedPRs.length;
     let successCount = 0;
 
     for (let i = 0; i < sortedPRs.length; i++) {
         const pr = sortedPRs[i];
         if (!pr) continue;
 
-        // Only update open PRs (those in the current branch chain), but skip integration branch
-        if (prBranches.includes(pr.headRefName) && pr.headRefName !== integrationBranchName) {
+        // Only update open PRs (those in the current branch chain)
+        if (prBranches.includes(pr.headRefName)) {
             const position = i + 1;
             const newTitle = addNumberPrefix(pr.title, position, total);
 

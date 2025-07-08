@@ -14,22 +14,22 @@ async function main(): Promise<void> {
         .name('gh-propagate')
         .description('Propagate changes through a chain of pull requests')
         .version(VERSION)
-        .argument('<base-branch>', 'The base branch to start propagation from')
+        .argument('<integration-branch>', 'The integration branch that merges into base branch')
         .argument('<target-branch>', 'The target branch to propagate changes to')
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)
-        .option('-l, --list', 'List all PRs in the chain as markdown links', false)
-        .option('-e, --edit <operations...>', 'Edit PR attributes. Available: title, integration', [])
+        .option('-l, --list', 'List all PRs that merge into integration-branch', false)
+        .option('-e, --edit <operations...>', 'Edit PR attributes. Available: title, desc', [])
         .option('--debug', 'Enable debug logging', false)
-        .action(async (baseBranch: string, targetBranch: string, options: PropagateOptions) => {
+        .action(async (integrationBranch: string, targetBranch: string, options: PropagateOptions) => {
             try {
                 if (options.debug) {
                     console.log('Debug mode enabled');
                 }
 
                 if (options.list) {
-                    await listPRChain(baseBranch, targetBranch, { debug: options.debug });
+                    await listPRChain(integrationBranch, targetBranch, { debug: options.debug });
                 } else {
-                    await propagateChanges(baseBranch, targetBranch, {
+                    await propagateChanges(integrationBranch, targetBranch, {
                         dryRun: options.dryRun,
                         edit: options.edit,
                         debug: options.debug,

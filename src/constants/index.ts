@@ -4,7 +4,7 @@ export const VERSION = '0.2.5';
 // Edit operations
 export const EDIT_OPERATIONS = {
     TITLE: 'title',
-    INTEGRATION: 'integration',
+    DESC: 'desc',
 } as const;
 
 export const VALID_EDIT_OPERATIONS = Object.values(EDIT_OPERATIONS);

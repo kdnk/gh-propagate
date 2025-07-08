@@ -27,7 +27,7 @@ export interface PropagateOptions {
     debug?: boolean;
 }
 
-export type EditOperation = 'title' | 'integration';
+export type EditOperation = 'title' | 'desc';
 
 export interface ChainInfo {
     branches: string[];

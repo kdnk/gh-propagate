@@ -4,7 +4,7 @@ import { getPullRequest, getMergedPRs } from './github.js';
 export async function buildPRChain(
     startBranch: string,
     baseBranch: string,
-    options: { integration?: boolean } = {}
+    options: { integration?: boolean; integrationBranch?: string } = {}
 ): Promise<ChainInfo> {
     const branches: string[] = [];
     const prUrls = new Map<string, string>();
@@ -26,13 +26,9 @@ export async function buildPRChain(
 
     branches.push(baseBranch);
 
-    // If integration mode, include merged PRs in the chain for numbering
-    if (options.integration) {
-        // Find the integration PR first to get its branch name
-        const integrationPR = Array.from(prDetails.values()).find((pr) => pr.baseRefName === baseBranch);
-        const mergedPRs = integrationPR
-            ? await getMergedPRs(integrationPR.headRefName)
-            : await getMergedPRs(baseBranch);
+    // If integration mode and integration branch is specified, include merged PRs
+    if (options.integration && options.integrationBranch) {
+        const mergedPRs = await getMergedPRs(options.integrationBranch);
 
         for (const mergedPR of mergedPRs) {
             // Only add if not already in the chain

@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import type { PullRequest, EditOperation } from '../types/index.js';
 import { updatePRTitlesWithNumbers } from './pr-titles.js';
-import { updatePRDescription } from '../services/github.js';
+import { updatePRDescription, getMergedPRs } from '../services/github.js';
 import { sortPRsByMergeDateOrNumber, filterPRsExcludingBaseBranch } from './pr-sorting.js';
 import { VALID_EDIT_OPERATIONS, STATUS_ICONS, MESSAGES } from '../constants/index.js';
 
@@ -9,9 +9,9 @@ export async function executeEditOperations(
     operations: string[],
     prDetails: Map<string, PullRequest>,
     branches: string[],
+    integrationBranch: string,
     baseBranch: string,
-    dryRun: boolean = false,
-    integrationMode: boolean = false
+    dryRun: boolean = false
 ): Promise<void> {
     if (operations.length === 0) {
         return;
@@ -33,9 +33,9 @@ export async function executeEditOperations(
             operation as EditOperation,
             prDetails,
             branches,
+            integrationBranch,
             baseBranch,
-            dryRun,
-            integrationMode
+            dryRun
         );
     }
 }
@@ -44,9 +44,9 @@ async function executeEditOperation(
     operation: EditOperation,
     prDetails: Map<string, PullRequest>,
     branches: string[],
+    integrationBranch: string,
     baseBranch: string,
-    dryRun: boolean,
-    integrationMode: boolean
+    dryRun: boolean
 ): Promise<void> {
     switch (operation) {
         case 'title':
@@ -54,13 +54,13 @@ async function executeEditOperation(
             await updatePRTitlesWithNumbers({
                 prDetails,
                 branches,
+                integrationBranch,
                 baseBranch,
                 dryRun,
-                integration: true,
             });
             break;
-        case 'integration':
-            await updateIntegrationPRDescription(prDetails, branches, baseBranch, dryRun, integrationMode);
+        case 'desc':
+            await updateIntegrationPRDescription(prDetails, branches, integrationBranch, baseBranch, dryRun);
             break;
         default:
             console.error(chalk.red(`❌ Unknown edit operation: ${operation}`));
@@ -70,25 +70,21 @@ async function executeEditOperation(
 async function updateIntegrationPRDescription(
     prDetails: Map<string, PullRequest>,
     branches: string[],
+    integrationBranch: string,
     baseBranch: string,
-    dryRun: boolean,
-    integrationMode: boolean
+    dryRun: boolean
 ): Promise<void> {
     console.log(chalk.blue(`\n${MESSAGES.UPDATING_INTEGRATION_PR}`));
 
-    const integrationPR = findIntegrationPR(prDetails, branches, baseBranch);
+    const integrationPR = prDetails.get(integrationBranch);
 
     if (!integrationPR) {
-        if (branches.filter((branch) => branch !== baseBranch).length === 0) {
-            console.log(chalk.yellow(MESSAGES.NO_PRS_TO_UPDATE));
-        } else {
-            console.error(chalk.red(MESSAGES.INTEGRATION_PR_NOT_FOUND));
-        }
+        console.error(chalk.red(MESSAGES.INTEGRATION_PR_NOT_FOUND));
         return;
     }
 
     // Build PR list
-    const prList = buildPRListMarkdown(prDetails, branches, baseBranch, integrationMode);
+    const prList = await buildPRListMarkdown(prDetails, branches, integrationBranch, baseBranch);
 
     // Get current PR details to read existing description
     const currentDescription = integrationPR.body || '';
@@ -97,54 +93,39 @@ async function updateIntegrationPRDescription(
     await updatePRDescription(integrationPR.number, newDescription, dryRun);
 }
 
-function buildPRListMarkdown(
+async function buildPRListMarkdown(
     prDetails: Map<string, PullRequest>,
     branches: string[],
-    baseBranch: string,
-    integrationMode: boolean
-): string {
+    integrationBranch: string,
+    baseBranch: string
+): Promise<string> {
     const prBranches = branches.filter((branch) => branch !== baseBranch);
 
-    if (integrationMode) {
-        // Find the integration PR first
-        const integrationPR = findIntegrationPR(prDetails, branches, baseBranch);
-        if (!integrationPR) {
-            return '';
-        }
+    // Get merged PRs that target the integration branch
+    const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
 
-        // Only include PRs that merge directly into the integration branch
-        const integrationBranchPRs = Array.from(prDetails.values()).filter(
-            (pr) => pr.baseRefName === integrationPR.headRefName
-        );
+    // Get open PRs that target the integration branch
+    const openPRsToIntegration = Array.from(prDetails.values()).filter((pr) => pr.baseRefName === integrationBranch);
 
-        const sortedPRs = sortPRsByMergeDateOrNumber(integrationBranchPRs);
+    // Combine open and merged PRs
+    const allIntegrationBranchPRs = [...openPRsToIntegration, ...mergedPRsToIntegration];
 
-        const total = sortedPRs.length;
-        return sortedPRs
-            .map((pr, index) => {
-                const position = index + 1;
-                const status = prBranches.includes(pr.headRefName) ? 'open' : 'merged';
-                const statusIcon = status === 'merged' ? STATUS_ICONS.MERGED_EMOJI : STATUS_ICONS.OPEN_EMOJI;
-                return `- [${position}/${total}] ${statusIcon} #${pr.number}`;
-            })
-            .join('\n');
-    } else {
-        // Only include open PRs in the current chain
-        const reversedPRBranches = [...prBranches].reverse();
-        const total = reversedPRBranches.length;
+    // Remove duplicates (in case a PR appears in both lists)
+    const uniquePRs = allIntegrationBranchPRs.filter(
+        (pr, index, array) => array.findIndex((p) => p.number === pr.number) === index
+    );
 
-        return reversedPRBranches
-            .map((branch, index) => {
-                const pr = prDetails.get(branch);
-                if (pr) {
-                    const position = index + 1;
-                    return `- [${position}/${total}] ${STATUS_ICONS.OPEN_EMOJI} #${pr.number}`;
-                }
-                return '';
-            })
-            .filter((line) => line !== '')
-            .join('\n');
-    }
+    const sortedPRs = sortPRsByMergeDateOrNumber(uniquePRs);
+
+    const total = sortedPRs.length;
+    return sortedPRs
+        .map((pr, index) => {
+            const position = index + 1;
+            const status = prBranches.includes(pr.headRefName) ? 'open' : 'merged';
+            const statusIcon = status === 'merged' ? STATUS_ICONS.MERGED_EMOJI : STATUS_ICONS.OPEN_EMOJI;
+            return `- [${position}/${total}] ${statusIcon} #${pr.number}`;
+        })
+        .join('\n');
 }
 
 function updateDescriptionWithPRList(currentDescription: string, prList: string): string {
