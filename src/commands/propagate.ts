@@ -25,29 +25,46 @@ export async function propagateChanges(
         logDebug(`Options: dryRun=${dryRun}, edit=[${edit.join(', ')}]`);
     }
 
-    // First, validate that the integration branch has a corresponding PR
-    const integrationPR = await getPullRequest(integrationBranch);
-    if (!integrationPR) {
-        console.error(
-            chalk.red('❌ Integration branch PR not found. Make sure the integration branch has a corresponding PR.')
+    let baseBranch: string;
+    let integrationPR: any = null;
+
+    // Only validate integration branch PR if edit operations are requested
+    if (edit.length > 0) {
+        integrationPR = await getPullRequest(integrationBranch);
+        if (!integrationPR) {
+            console.error(
+                chalk.red(
+                    '❌ Integration branch PR not found. Make sure the integration branch has a corresponding PR.'
+                )
+            );
+            process.exit(1);
+        }
+        baseBranch = integrationPR.baseRefName;
+        logDebug(
+            `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integrationBranch} → ${baseBranch})`
         );
-        process.exit(1);
+    } else {
+        // For simple propagation, try to get integration PR to find base branch, but don't fail if not found
+        integrationPR = await getPullRequest(integrationBranch);
+        if (integrationPR) {
+            baseBranch = integrationPR.baseRefName;
+            logDebug(
+                `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integrationBranch} → ${baseBranch})`
+            );
+        } else {
+            // If no integration PR found, assume the first argument is the base branch for simple propagation
+            baseBranch = integrationBranch;
+            logDebug(`No integration PR found, using ${integrationBranch} as base branch for propagation`);
+        }
     }
 
-    const baseBranch = integrationPR.baseRefName;
-    logDebug(
-        `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integrationBranch} → ${baseBranch})`
-    );
+    console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
-    console.log(
-        chalk.blue(`🔍 Building PR chain from ${chalk.cyan(integrationBranch)} to ${chalk.cyan(targetBranch)}...`)
-    );
-
-    // Always include merged PRs for accurate PR chain and numbering
-    logDebug('Building PR chain with integration mode enabled');
+    // Include merged PRs only if edit operations are requested
+    logDebug(`Building PR chain with integration mode: ${edit.length > 0}`);
     const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, {
-        integration: true,
-        integrationBranch,
+        integration: edit.length > 0,
+        integrationBranch: edit.length > 0 ? integrationBranch : undefined,
     });
     logDebug(`Found ${branches.length} branches in chain: [${branches.join(', ')}]`);
 
