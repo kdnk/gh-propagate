@@ -79,3 +79,41 @@
 - Always use absolute file paths, never relative paths
 - Prefer explicit type checking over type assertions (`pr.state === 'MERGED'` vs `pr.state!`)
 - Use TodoWrite tool for complex multi-step implementations to track progress
+
+### Automated Git Workflow
+
+- Always commit and push changes automatically when implementation tasks are completed
+- Use descriptive commit messages that explain the "why" and include implementation details
+- Follow consistent commit message format with emoji indicators and co-authorship
+- Batch related changes into logical commits rather than frequent small commits
+- Include HEREDOC syntax for multi-line commit messages to ensure proper formatting
+- Always run `git status`, `git diff`, and `git log` in parallel before committing to understand current state
+- Add all changes with `git add .` before committing to ensure nothing is missed
+- Push immediately after successful commit to keep remote repository synchronized
+
+#### Commit Message Structure
+
+```bash
+git commit -m "$(cat <<'EOF'
+<type>: <concise description>
+
+- Detailed change 1
+- Detailed change 2  
+- Detailed change 3
+
+<Additional context or impact>
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+#### Types and Examples
+
+- `feat:` - New features or major functionality additions
+- `fix:` - Bug fixes and corrections
+- `refactor:` - Code restructuring without behavior changes
+- `docs:` - Documentation updates and improvements
+- `chore:` - Maintenance tasks and tooling updates
