@@ -13,24 +13,29 @@ import {
 } from '../utils/console.js';
 
 export async function propagateChanges(
-    integrationBranch: string,
-    targetBranch: string,
-    options: { dryRun?: boolean; edit?: string[]; debug?: boolean } = {}
+    featureBranch: string,
+    options: { dryRun?: boolean; edit?: string[]; integration?: string; debug?: boolean } = {}
 ): Promise<void> {
-    const { dryRun = false, edit = [], debug = false } = options;
+    const { dryRun = false, edit = [], integration, debug = false } = options;
 
     if (debug) {
         enableDebugLogging();
-        logDebug(`Starting propagation from integration branch ${integrationBranch} to ${targetBranch}`);
-        logDebug(`Options: dryRun=${dryRun}, edit=[${edit.join(', ')}]`);
+        logDebug(`Starting propagation to ${featureBranch}`);
+        logDebug(`Options: dryRun=${dryRun}, edit=[${edit.join(', ')}], integration=${integration || 'none'}`);
+    }
+
+    // Validate integration branch is required for edit operations
+    if (edit.length > 0 && !integration) {
+        console.error(chalk.red('❌ --integration option is required when using --edit'));
+        process.exit(1);
     }
 
     let baseBranch: string;
     let integrationPR: any = null;
 
-    // Only validate integration branch PR if edit operations are requested
-    if (edit.length > 0) {
-        integrationPR = await getPullRequest(integrationBranch);
+    if (integration) {
+        // Integration branch specified - validate it has a corresponding PR
+        integrationPR = await getPullRequest(integration);
         if (!integrationPR) {
             console.error(
                 chalk.red(
@@ -41,38 +46,38 @@ export async function propagateChanges(
         }
         baseBranch = integrationPR.baseRefName;
         logDebug(
-            `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integrationBranch} → ${baseBranch})`
+            `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integration} → ${baseBranch})`
         );
     } else {
-        // For simple propagation, try to get integration PR to find base branch, but don't fail if not found
-        integrationPR = await getPullRequest(integrationBranch);
-        if (integrationPR) {
-            baseBranch = integrationPR.baseRefName;
-            logDebug(
-                `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integrationBranch} → ${baseBranch})`
-            );
-        } else {
-            // If no integration PR found, assume the first argument is the base branch for simple propagation
-            baseBranch = integrationBranch;
-            logDebug(`No integration PR found, using ${integrationBranch} as base branch for propagation`);
+        // Simple propagation - find base branch by traversing the PR chain
+        let currentBranch = featureBranch;
+        while (true) {
+            const pr = await getPullRequest(currentBranch);
+            if (!pr) {
+                // No more PRs in chain, this is the base branch
+                baseBranch = currentBranch;
+                break;
+            }
+            currentBranch = pr.baseRefName;
         }
+        logDebug(`Found base branch: ${baseBranch}`);
     }
 
-    console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
+    console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(featureBranch)}...`));
 
-    // Include merged PRs only if edit operations are requested
-    logDebug(`Building PR chain with integration mode: ${edit.length > 0}`);
-    const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, {
-        integration: edit.length > 0,
-        integrationBranch: edit.length > 0 ? integrationBranch : undefined,
+    // Include merged PRs only if integration is specified
+    logDebug(`Building PR chain with integration mode: ${!!integration}`);
+    const { branches, prUrls, prDetails } = await buildPRChain(featureBranch, baseBranch, {
+        integration: !!integration,
+        integrationBranch: integration,
     });
     logDebug(`Found ${branches.length} branches in chain: [${branches.join(', ')}]`);
 
     logChainDiscovery(branches);
 
-    if (edit.length > 0) {
+    if (edit.length > 0 && integration) {
         logDebug(`Executing ${edit.length} edit operations: [${edit.join(', ')}]`);
-        await executeEditOperations(edit, prDetails, branches, integrationBranch, baseBranch, dryRun);
+        await executeEditOperations(edit, prDetails, branches, integration, baseBranch, dryRun);
     }
 
     const reversedChain = [...branches].reverse();
@@ -80,16 +85,16 @@ export async function propagateChanges(
 
     for (let i = 0; i < reversedChain.length - 1; i++) {
         const sourceBranch = reversedChain[i];
-        const targetBranch = reversedChain[i + 1];
+        const targetBranchStep = reversedChain[i + 1];
 
-        if (!sourceBranch || !targetBranch) {
+        if (!sourceBranch || !targetBranchStep) {
             continue;
         }
 
-        logMergeStep(i, reversedChain.length - 1, sourceBranch, targetBranch);
-        logDebug(`Merging step ${i + 1}/${reversedChain.length - 1}: ${sourceBranch} → ${targetBranch}`);
+        logMergeStep(i, reversedChain.length - 1, sourceBranch, targetBranchStep);
+        logDebug(`Merging step ${i + 1}/${reversedChain.length - 1}: ${sourceBranch} → ${targetBranchStep}`);
 
-        const targetUrl = prUrls.get(targetBranch);
+        const targetUrl = prUrls.get(targetBranchStep);
         if (targetUrl) {
             logPRUrl(targetUrl);
             logDebug(`Target PR URL: ${targetUrl}`);
@@ -97,11 +102,11 @@ export async function propagateChanges(
 
         await executeGitCommand(`git switch ${sourceBranch}`, dryRun);
         await executeGitCommand(`git pull`, dryRun);
-        await executeGitCommand(`git switch ${targetBranch}`, dryRun);
+        await executeGitCommand(`git switch ${targetBranchStep}`, dryRun);
         await executeGitCommand(`git pull`, dryRun);
         await executeGitCommand(`git merge --no-ff ${sourceBranch}`, dryRun);
         await executeGitCommand(`git push`, dryRun);
     }
 
-    logCompletionMessage(targetBranch, dryRun);
+    logCompletionMessage(featureBranch, dryRun);
 }

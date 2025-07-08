@@ -14,24 +14,29 @@ async function main(): Promise<void> {
         .name('gh-propagate')
         .description('Propagate changes through a chain of pull requests')
         .version(VERSION)
-        .argument('<integration-branch>', 'The integration branch that merges into base branch')
-        .argument('<target-branch>', 'The target branch to propagate changes to')
+        .argument('<feature-branch>', 'The target feature branch to propagate changes to')
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)
-        .option('-l, --list', 'List all PRs that merge into integration-branch', false)
+        .option('-l, --list', 'List all PRs in the chain or integration branch', false)
         .option('-e, --edit <operations...>', 'Edit PR attributes. Available: title, desc', [])
+        .option('-i, --integration <branch>', 'Specify integration branch for list/edit operations')
         .option('--debug', 'Enable debug logging', false)
-        .action(async (integrationBranch: string, targetBranch: string, options: PropagateOptions) => {
+        .action(async (featureBranch: string, options: PropagateOptions) => {
             try {
                 if (options.debug) {
                     console.log('Debug mode enabled');
                 }
 
                 if (options.list) {
-                    await listPRChain(integrationBranch, targetBranch, { debug: options.debug });
+                    if (!options.integration) {
+                        console.error(chalk.red('❌ --integration option is required when using --list'));
+                        process.exit(1);
+                    }
+                    await listPRChain(options.integration, featureBranch, { debug: options.debug });
                 } else {
-                    await propagateChanges(integrationBranch, targetBranch, {
+                    await propagateChanges(featureBranch, {
                         dryRun: options.dryRun,
                         edit: options.edit,
+                        integration: options.integration,
                         debug: options.debug,
                     });
                 }
