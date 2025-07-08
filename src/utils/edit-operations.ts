@@ -112,6 +112,7 @@ async function buildPRListMarkdown(
 
     // Get open PRs that target the integration branch
     const openPRsToIntegration = Array.from(prDetails.values()).filter((pr) => pr.baseRefName === integrationBranch);
+    console.log(`[edit-operations.ts:115] openPRsToIntegration: `, openPRsToIntegration);
 
     // Combine open and merged PRs
     const allIntegrationBranchPRs = [...openPRsToIntegration, ...mergedPRsToIntegration];
@@ -120,6 +121,7 @@ async function buildPRListMarkdown(
     const uniquePRs = allIntegrationBranchPRs.filter(
         (pr, index, array) => array.findIndex((p) => p.number === pr.number) === index
     );
+    console.log(`[edit-operations.ts:124] uniquePRs: `, uniquePRs);
 
     const sortedPRs = sortPRsByMergeDateOrNumber(uniquePRs);
     console.log(`[edit-operations.ts:123] sortedPRs: `, sortedPRs);
