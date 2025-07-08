@@ -103,28 +103,23 @@ async function buildPRListMarkdown(
     integrationBranch: string,
     baseBranch: string
 ): Promise<string> {
-    console.log(`[edit-operations.ts:106] branches: `, branches);
     const prBranches = branches.filter((branch) => branch !== baseBranch);
-    console.log(`[edit-operations.ts:108] prBranches: `, prBranches);
 
     // Get merged PRs that target the integration branch
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
 
-    // Get open PRs that target the integration branch
-    const openPRsToIntegration = Array.from(prDetails.values()).filter((pr) => pr.baseRefName === integrationBranch);
-    console.log(`[edit-operations.ts:115] openPRsToIntegration: `, openPRsToIntegration);
+    // Get all PRs in the chain (excluding integration branch itself)
+    const allChainPRs = Array.from(prDetails.values()).filter(
+        (pr) => pr.headRefName !== integrationBranch && prBranches.includes(pr.headRefName)
+    );
 
-    // Combine open and merged PRs
-    const allIntegrationBranchPRs = [...openPRsToIntegration, ...mergedPRsToIntegration];
+    // Combine chain PRs and merged PRs that target integration branch
+    const allPRs = [...allChainPRs, ...mergedPRsToIntegration];
 
     // Remove duplicates (in case a PR appears in both lists)
-    const uniquePRs = allIntegrationBranchPRs.filter(
-        (pr, index, array) => array.findIndex((p) => p.number === pr.number) === index
-    );
-    console.log(`[edit-operations.ts:124] uniquePRs: `, uniquePRs);
+    const uniquePRs = allPRs.filter((pr, index, array) => array.findIndex((p) => p.number === pr.number) === index);
 
     const sortedPRs = sortPRsByMergeDateOrNumber(uniquePRs);
-    console.log(`[edit-operations.ts:123] sortedPRs: `, sortedPRs);
 
     const total = sortedPRs.length;
     return sortedPRs
