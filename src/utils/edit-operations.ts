@@ -120,6 +120,7 @@ async function buildPRListMarkdown(
     );
 
     const sortedPRs = sortPRsByMergeDateOrNumber(uniquePRs);
+    console.log(`[edit-operations.ts:123] sortedPRs: `, sortedPRs);
 
     const total = sortedPRs.length;
     return sortedPRs
