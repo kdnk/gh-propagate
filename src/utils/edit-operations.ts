@@ -125,7 +125,7 @@ async function buildPRListMarkdown(
     return sortedPRs
         .map((pr, index) => {
             const position = index + 1;
-            const status = pr.state === 'MERGED' ? 'merged' : 'open';
+            const status = pr.state === 'merged' ? 'merged' : 'open';
             const statusIcon = status === 'merged' ? STATUS_ICONS.MERGED_EMOJI : STATUS_ICONS.OPEN_EMOJI;
             return `- [${position}/${total}] ${statusIcon} #${pr.number}`;
         })
