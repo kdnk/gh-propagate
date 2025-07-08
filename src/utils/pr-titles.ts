@@ -51,6 +51,10 @@ async function updatePRTitlesInIntegrationMode(
     baseBranch: string,
     dryRun: boolean
 ): Promise<void> {
+    // Find the integration PR (the one that merges directly into base branch)
+    const integrationPR = Array.from(prDetails.values()).find((pr) => pr.baseRefName === baseBranch);
+    const integrationBranchName = integrationPR?.headRefName;
+
     const allPRs = filterPRsExcludingBaseBranch(prDetails, baseBranch);
     const sortedPRs = sortPRsByMergeDateOrNumber(allPRs);
     const total = allPRs.length;
@@ -60,8 +64,8 @@ async function updatePRTitlesInIntegrationMode(
         const pr = sortedPRs[i];
         if (!pr) continue;
 
-        // Only update open PRs (those in the current branch chain)
-        if (prBranches.includes(pr.headRefName)) {
+        // Only update open PRs (those in the current branch chain), but skip integration branch
+        if (prBranches.includes(pr.headRefName) && pr.headRefName !== integrationBranchName) {
             const position = i + 1;
             const newTitle = addNumberPrefix(pr.title, position, total);
 
