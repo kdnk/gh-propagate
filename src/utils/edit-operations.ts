@@ -88,7 +88,7 @@ async function updateIntegrationPRDescription(
 
     // Display the PR list content on console
     console.log(chalk.yellow('\n📋 PR List that will be added to description:'));
-    console.log(prList);
+    console.log(chalk.yellow(prList));
 
     // Get current PR details to read existing description
     const currentDescription = integrationPR.body || '';
