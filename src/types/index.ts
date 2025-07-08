@@ -5,16 +5,16 @@ export interface PullRequest {
     url: string;
     title: string;
     body?: string;
-    state?: 'open' | 'merged' | 'closed';
+    state?: 'OPEN' | 'MERGED' | 'CLOSED';
     mergedAt?: string;
 }
 
 export interface OpenPullRequest extends PullRequest {
-    state: 'open';
+    state: 'OPEN';
 }
 
 export interface MergedPullRequest extends PullRequest {
-    state: 'merged';
+    state: 'MERGED';
     mergedAt: string;
 }
 

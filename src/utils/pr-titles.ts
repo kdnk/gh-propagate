@@ -82,33 +82,7 @@ async function updatePRTitlesInIntegrationMode(
         }
     }
 
-    console.log(chalk.green(`✅ Updated ${successCount}/${total} PR titles successfully`));
-}
-
-async function updatePRTitlesInNormalMode(
-    prDetails: Map<string, PullRequest>,
-    prBranches: string[],
-    dryRun: boolean
-): Promise<void> {
-    const reversedPRBranches = [...prBranches].reverse();
-    const total = reversedPRBranches.length;
-    let successCount = 0;
-
-    for (let i = 0; i < reversedPRBranches.length; i++) {
-        const branch = reversedPRBranches[i];
-        if (!branch) continue;
-        const pr = prDetails.get(branch);
-
-        if (pr) {
-            const position = i + 1;
-            const newTitle = addNumberPrefix(pr.title, position, total);
-
-            const success = await updatePRTitle(pr.number, newTitle, dryRun);
-            if (success) {
-                successCount++;
-            }
-        }
+    if (!dryRun) {
+        console.log(chalk.green(`✅ Updated ${successCount}/${total} PR titles successfully`));
     }
-
-    console.log(chalk.green(`✅ Updated ${successCount}/${total} PR titles successfully`));
 }
