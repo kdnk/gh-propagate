@@ -11,7 +11,7 @@ Given a base branch and target branch with sequential PRs like:
 - `dev ← feature-1` (PR #123)
 - `feature-1 ← feature-2` (PR #124)
 
-Running `gh-propagate dev feature-2` will:
+Running `gh-propagate feature-2` will:
 
 1. **Discovery Phase**: Use `gh pr view --json number,headRefName,baseRefName,url,title,body --head <branch>` to discover the PR chain:
     - Find feature-2's target branch (feature-1)

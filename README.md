@@ -21,7 +21,7 @@ The tool discovers the chain of pull requests by traversing from your target bra
 - Base branch: `dev`
 - Pull request chain: `dev ← feature-1 ← feature-2`
 
-When you run `gh-propagate dev feature-2`, the tool will:
+When you run `gh-propagate feature-2`, the tool will:
 
 1. Discover the PR chain: `dev → feature-1 → feature-2`
 2. Merge changes in order: `dev` → `feature-1` → `feature-2`

@@ -13,14 +13,14 @@ import {
 } from '../utils/console.js';
 
 export async function propagateChanges(
-    featureBranch: string,
+    targetBranch: string,
     options: { dryRun?: boolean; edit?: string[]; integration?: string; debug?: boolean } = {}
 ): Promise<void> {
     const { dryRun = false, edit = [], integration, debug = false } = options;
 
     if (debug) {
         enableDebugLogging();
-        logDebug(`Starting propagation to ${featureBranch}`);
+        logDebug(`Starting propagation to ${targetBranch}`);
         logDebug(`Options: dryRun=${dryRun}, edit=[${edit.join(', ')}], integration=${integration || 'none'}`);
     }
 
@@ -50,7 +50,7 @@ export async function propagateChanges(
         );
     } else {
         // Simple propagation - find base branch by traversing the PR chain
-        let currentBranch = featureBranch;
+        let currentBranch = targetBranch;
         while (true) {
             const pr = await getPullRequest(currentBranch);
             if (!pr) {
@@ -63,11 +63,11 @@ export async function propagateChanges(
         logDebug(`Found base branch: ${baseBranch}`);
     }
 
-    console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(featureBranch)}...`));
+    console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
     // Include merged PRs only if integration is specified
     logDebug(`Building PR chain with integration mode: ${!!integration}`);
-    const { branches, prUrls, prDetails } = await buildPRChain(featureBranch, baseBranch, {
+    const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, {
         integration: !!integration,
         integrationBranch: integration,
     });
@@ -108,5 +108,5 @@ export async function propagateChanges(
         await executeGitCommand(`git push`, dryRun);
     }
 
-    logCompletionMessage(featureBranch, dryRun);
+    logCompletionMessage(targetBranch, dryRun);
 }
