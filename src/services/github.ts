@@ -6,9 +6,9 @@ import { logAPICall, logDebug } from '../utils/console.js';
 export async function getPullRequest(branch: string): Promise<PullRequest | null> {
     try {
         logAPICall(`gh pr view ${branch}`);
-        const result = await $`gh pr view --json number,headRefName,baseRefName,url,title,body ${branch}`.text();
+        const result = await $`gh pr view --json number,headRefName,baseRefName,url,title,body,state ${branch}`.text();
         const pr = JSON.parse(result);
-        logDebug(`Retrieved PR for branch ${branch}: #${pr.number} "${pr.title}"`);
+        logDebug(`Retrieved PR for branch ${branch}: #${pr.number} "${pr.title}" (${pr.state})`);
         return pr;
     } catch (error) {
         logDebug(`No PR found for branch ${branch}: ${error instanceof Error ? error.message : String(error)}`);
@@ -20,7 +20,7 @@ export async function getMergedPRs(baseBranch: string): Promise<PullRequest[]> {
     try {
         logAPICall(`gh pr list --state merged --base ${baseBranch}`);
         const result =
-            await $`gh pr list --state merged --base ${baseBranch} --json number,headRefName,baseRefName,url,title,mergedAt`.text();
+            await $`gh pr list --state merged --base ${baseBranch} --json number,headRefName,baseRefName,url,title,mergedAt,state`.text();
         const prs = JSON.parse(result);
         const sortedPrs = prs.sort((a: any, b: any) => new Date(a.mergedAt).getTime() - new Date(b.mergedAt).getTime());
         logDebug(`Retrieved ${sortedPrs.length} merged PRs for base branch ${baseBranch}`);

@@ -73,7 +73,7 @@ export async function listPRChain(
     const total = sortedPRs.length;
     sortedPRs.forEach((pr, index) => {
         const position = index + 1;
-        const status = prBranches.includes(pr.headRefName) ? 'open' : 'merged';
+        const status = pr.state === 'MERGED' ? 'merged' : 'open';
         const statusIcon = status === 'merged' ? STATUS_ICONS.MERGED : STATUS_ICONS.OPEN;
         logDebug(`PR #${pr.number}: position=${position}/${total}, status=${status}`);
         console.log(`- [${position}/${total}] ${statusIcon} #${pr.number}: [${pr.title}](${pr.url})`);
