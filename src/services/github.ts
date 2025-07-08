@@ -1,5 +1,6 @@
 import { $ } from 'bun';
 import type { PullRequest } from '../types/index.js';
+import chalk from 'chalk';
 
 export async function getPullRequest(branch: string): Promise<PullRequest | null> {
     try {
@@ -25,10 +26,11 @@ export async function getMergedPRs(baseBranch: string): Promise<PullRequest[]> {
 export async function updatePRTitle(prNumber: number, newTitle: string, dryRun: boolean = false): Promise<boolean> {
     try {
         if (dryRun) {
-            console.log(`[DRY RUN] Would update PR #${prNumber} title to: "${newTitle}"`);
+            console.log(chalk.yellow(`[DRY RUN] Would update PR #${prNumber} title to: "${newTitle}"`));
             return true;
         } else {
             await $`gh pr edit ${prNumber} --title ${newTitle}`.quiet();
+            console.log(chalk.green(`✅ PR #${prNumber}: "${newTitle}"`));
             return true;
         }
     } catch (error) {
@@ -47,10 +49,11 @@ export async function updatePRDescription(
 ): Promise<boolean> {
     try {
         if (dryRun) {
-            console.log(`[DRY RUN] Would update PR #${prNumber} description`);
+            console.log(chalk.yellow(`[DRY RUN] Would update PR #${prNumber} description`));
             return true;
         } else {
             await $`gh pr edit ${prNumber} --body ${newDescription}`.quiet();
+            console.log(chalk.green(`✅ Updated integration PR #${prNumber} description`));
             return true;
         }
     } catch (error) {

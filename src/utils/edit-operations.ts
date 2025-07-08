@@ -94,10 +94,7 @@ async function updateIntegrationPRDescription(
     const currentDescription = integrationPR.body || '';
     const newDescription = updateDescriptionWithPRList(currentDescription, prList);
 
-    const success = await updatePRDescription(integrationPR.number, newDescription, dryRun);
-    if (success) {
-        console.log(chalk.green(`✅ Updated integration PR #${integrationPR.number} description`));
-    }
+    await updatePRDescription(integrationPR.number, newDescription, dryRun);
 }
 
 function buildPRListMarkdown(

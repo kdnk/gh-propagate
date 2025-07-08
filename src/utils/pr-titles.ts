@@ -67,7 +67,6 @@ async function updatePRTitlesInIntegrationMode(
 
             const success = await updatePRTitle(pr.number, newTitle, dryRun);
             if (success) {
-                console.log(chalk.green(`✅ PR #${pr.number}: "${newTitle}"`));
                 successCount++;
             }
         }
@@ -96,7 +95,6 @@ async function updatePRTitlesInNormalMode(
 
             const success = await updatePRTitle(pr.number, newTitle, dryRun);
             if (success) {
-                console.log(chalk.green(`✅ PR #${pr.number}: "${newTitle}"`));
                 successCount++;
             }
         }

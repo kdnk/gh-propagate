@@ -24,10 +24,6 @@ export async function propagateChanges(
         await executeEditOperations(edit, prDetails, branches, baseBranch, dryRun, true);
     }
 
-    if (dryRun) {
-        console.log(chalk.yellow(`\n🔍 DRY RUN MODE: Showing what would be executed without making changes`));
-    }
-
     const reversedChain = [...branches].reverse();
 
     for (let i = 0; i < reversedChain.length - 1; i++) {
