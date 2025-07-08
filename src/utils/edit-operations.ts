@@ -86,6 +86,10 @@ async function updateIntegrationPRDescription(
     // Build PR list
     const prList = await buildPRListMarkdown(prDetails, branches, integrationBranch, baseBranch);
 
+    // Display the PR list content on console
+    console.log(chalk.yellow('\n📋 PR List that will be added to description:'));
+    console.log(prList);
+
     // Get current PR details to read existing description
     const currentDescription = integrationPR.body || '';
     const newDescription = updateDescriptionWithPRList(currentDescription, prList);
