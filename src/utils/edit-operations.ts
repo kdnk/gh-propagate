@@ -103,7 +103,9 @@ async function buildPRListMarkdown(
     integrationBranch: string,
     baseBranch: string
 ): Promise<string> {
+    console.log(`[edit-operations.ts:106] branches: `, branches);
     const prBranches = branches.filter((branch) => branch !== baseBranch);
+    console.log(`[edit-operations.ts:108] prBranches: `, prBranches);
 
     // Get merged PRs that target the integration branch
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
