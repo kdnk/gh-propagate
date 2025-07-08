@@ -111,12 +111,12 @@ function buildPRListMarkdown(
         if (!integrationPR) {
             return '';
         }
-        
+
         // Only include PRs that merge directly into the integration branch
         const integrationBranchPRs = Array.from(prDetails.values()).filter(
             (pr) => pr.baseRefName === integrationPR.headRefName
         );
-        
+
         const sortedPRs = sortPRsByMergeDateOrNumber(integrationBranchPRs);
 
         const total = sortedPRs.length;

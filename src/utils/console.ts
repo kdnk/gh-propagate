@@ -1,5 +1,17 @@
 import chalk from 'chalk';
 
+let debugEnabled = false;
+
+export function enableDebugLogging(): void {
+    debugEnabled = true;
+}
+
+export function logDebug(message: string): void {
+    if (debugEnabled) {
+        console.log(chalk.gray(`🐛 [DEBUG] ${message}`));
+    }
+}
+
 export function logChainDiscovery(branches: string[]): void {
     console.log(chalk.green(`\n✅ Branch chain discovered:`));
     console.log(
@@ -33,5 +45,17 @@ export function logCompletionMessage(targetBranch: string, isDryRun: boolean): v
         );
     } else {
         console.log(chalk.green(`\n✅ Propagation complete! ${chalk.cyan(targetBranch)} is now up to date.`));
+    }
+}
+
+export function logCommand(command: string): void {
+    if (debugEnabled) {
+        console.log(chalk.gray(`🔧 [CMD] ${command}`));
+    }
+}
+
+export function logAPICall(endpoint: string, method: string = 'GET'): void {
+    if (debugEnabled) {
+        console.log(chalk.gray(`🌐 [API] ${method} ${endpoint}`));
     }
 }
