@@ -109,9 +109,18 @@ function buildPRListMarkdown(
     const prBranches = branches.filter((branch) => branch !== baseBranch);
 
     if (integrationMode) {
-        // Include all PRs (open and merged) sorted chronologically
-        const allPRs = filterPRsExcludingBaseBranch(prDetails, baseBranch);
-        const sortedPRs = sortPRsByMergeDateOrNumber(allPRs);
+        // Find the integration PR first
+        const integrationPR = findIntegrationPR(prDetails, branches, baseBranch);
+        if (!integrationPR) {
+            return '';
+        }
+        
+        // Only include PRs that merge directly into the integration branch
+        const integrationBranchPRs = Array.from(prDetails.values()).filter(
+            (pr) => pr.baseRefName === integrationPR.headRefName
+        );
+        
+        const sortedPRs = sortPRsByMergeDateOrNumber(integrationBranchPRs);
 
         const total = sortedPRs.length;
         return sortedPRs
@@ -186,7 +195,6 @@ export function findIntegrationPR(
     for (const branch of prBranches) {
         const pr = prDetails.get(branch);
         if (pr && pr.baseRefName === baseBranch) {
-            console.log(chalk.green(`✅ Found integration branch: ${branch} (PR #${pr.number})`));
             return pr;
         }
     }

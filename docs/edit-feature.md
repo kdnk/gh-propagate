@@ -28,12 +28,13 @@ Automatically prefix PR titles with sequential numbers in the format `[n/total]`
 
 ### Integration PR Description (`integration` operation)
 
-Updates the integration PR (the first PR in the chain that merges into the base branch) with a "## PRs" section containing a simplified list of all PRs in the chain with status icons but no links.
+Updates the integration PR (the first PR in the chain that merges into the base branch) with a "## PRs" section containing a simplified list of only the PRs that are directly merged into the integration branch, with status icons but no links.
 
 **Logic for Integration Operation**:
 
 - Find the integration PR (first PR in chain merging to base branch)
-- Generate a simplified list of all PRs with their numbered positions and status icons
+- Filter PRs to include only those directly merged into the integration branch (not the entire chain)
+- Generate a simplified list of filtered PRs with their numbered positions and status icons
 - Add or update a "## PRs" section in the integration PR description
 - If "## PRs" section already exists, replace it completely with the new content
 - Include status icons (🔄 for open, ✅ for merged PRs)
@@ -146,18 +147,17 @@ When PR editing is enabled, display:
 #### Integration Operation Examples
 
 **Adding PR list to empty description:**
-If the integration PR has no existing description, a new "## PRs" section is added:
+If the integration PR has no existing description, a new "## PRs" section is added with only PRs directly merged into the integration branch:
 
 ```markdown
 ## PRs
 
-- [1/3] ✅ #123
-- [2/3] 🔄 #124
-- [3/3] 🔄 #125
+- [1/2] ✅ #123
+- [2/2] 🔄 #124
 ```
 
 **Updating existing PR list:**
-If the integration PR already has a "## PRs" section, it is completely replaced:
+If the integration PR already has a "## PRs" section, it is completely replaced with only the PRs directly merged into the integration branch:
 
 Before:
 
@@ -174,16 +174,15 @@ This is the main PR for the feature.
 Some other content.
 ```
 
-After:
+After (assuming #125 is not directly merged into the integration branch):
 
 ```markdown
 This is the main PR for the feature.
 
 ## PRs
 
-- [1/3] ✅ #123
-- [2/3] 🔄 #124
-- [3/3] 🔄 #125
+- [1/2] ✅ #123
+- [2/2] 🔄 #124
 
 ## Additional Notes
 

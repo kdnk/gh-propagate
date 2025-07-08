@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { buildPRChain } from '../services/pr-chain.js';
 import { sortPRsByMergeDateOrNumber, filterPRsExcludingBaseBranch } from '../utils/pr-sorting.js';
+import { findIntegrationPR } from '../utils/edit-operations.js';
 import { STATUS_ICONS, MESSAGES } from '../constants/index.js';
 
 export async function listPRChain(baseBranch: string, targetBranch: string): Promise<void> {
@@ -14,9 +15,19 @@ export async function listPRChain(baseBranch: string, targetBranch: string): Pro
         return;
     }
 
-    // Always show all PRs with proper numbering (including merged PRs)
-    const allPRs = filterPRsExcludingBaseBranch(prDetails, baseBranch);
-    const sortedPRs = sortPRsByMergeDateOrNumber(allPRs);
+    // Find the integration PR first
+    const integrationPR = findIntegrationPR(prDetails, branches, baseBranch);
+    if (!integrationPR) {
+        console.log(chalk.yellow('⚠️  No integration branch detected'));
+        return;
+    }
+    
+    // Only show PRs that merge directly into the integration branch
+    const integrationBranchPRs = Array.from(prDetails.values()).filter(
+        (pr) => pr.baseRefName === integrationPR.headRefName
+    );
+    
+    const sortedPRs = sortPRsByMergeDateOrNumber(integrationBranchPRs);
 
     const total = sortedPRs.length;
     sortedPRs.forEach((pr, index) => {

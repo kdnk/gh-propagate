@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { buildPRChain } from '../services/pr-chain.js';
 import { executeGitCommand } from '../services/git.js';
-import { executeEditOperations } from '../utils/edit-operations.js';
+import { executeEditOperations, findIntegrationPR } from '../utils/edit-operations.js';
 import { logChainDiscovery, logMergeStep, logPRUrl, logCompletionMessage } from '../utils/console.js';
 
 export async function propagateChanges(
@@ -26,6 +26,15 @@ export async function propagateChanges(
 
     if (dryRun) {
         console.log(chalk.yellow(`🔍 DRY RUN MODE: Showing what would be executed without making changes\n`));
+        
+        // Display integration branch detection
+        const integrationPR = findIntegrationPR(prDetails, branches, baseBranch);
+        if (integrationPR) {
+            console.log(chalk.blue(`🔗 Integration branch: ${chalk.cyan(integrationPR.headRefName)} (PR #${integrationPR.number})`));
+        } else {
+            console.log(chalk.yellow(`⚠️  No integration branch detected`));
+        }
+        console.log(''); // Add spacing
     }
 
     const reversedChain = [...branches].reverse();

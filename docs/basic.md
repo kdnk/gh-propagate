@@ -24,7 +24,7 @@ Running `gh-propagate dev feature-2` will:
     - Update feature-1: `git switch feature-1`, `git pull`
     - Merge into feature-2: `git switch feature-2`, `git pull`, `git merge --no-ff feature-1`, `git push`
 
-3. **Integration Mode**: Automatically detects and includes merged PRs in all operations
+3. **Integration Mode**: Automatically detects integration branch and includes only PRs directly merged into it
 
 ## Command Line Interface
 
@@ -46,5 +46,6 @@ Available options:
 - Commander.js for CLI interface
 - Automatic integration branch detection
 - Status tracking with icons (🔄 for open, ✅ for merged)
+- Filters PRs to show only those directly merged into integration branch
 
 This ensures all PRs in the chain stay synchronized with the latest changes from the base branch.
