@@ -25,16 +25,7 @@ export async function propagateChanges(
     }
 
     if (dryRun) {
-        console.log(chalk.yellow(`🔍 DRY RUN MODE: Showing what would be executed without making changes\n`));
-        
-        // Display integration branch detection
-        const integrationPR = findIntegrationPR(prDetails, branches, baseBranch);
-        if (integrationPR) {
-            console.log(chalk.blue(`🔗 Integration branch: ${chalk.cyan(integrationPR.headRefName)} (PR #${integrationPR.number})`));
-        } else {
-            console.log(chalk.yellow(`⚠️  No integration branch detected`));
-        }
-        console.log(''); // Add spacing
+        console.log(chalk.yellow(`\n🔍 DRY RUN MODE: Showing what would be executed without making changes`));
     }
 
     const reversedChain = [...branches].reverse();
