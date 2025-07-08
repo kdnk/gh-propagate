@@ -26,8 +26,6 @@ export async function executeEditOperations(
         return;
     }
 
-    console.log(chalk.blue(`\n${MESSAGES.EXECUTING_EDIT_OPERATIONS} (${operations.join(', ')})...`));
-
     for (const operation of operations) {
         await executeEditOperation(
             operation as EditOperation,
