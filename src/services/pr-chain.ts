@@ -28,7 +28,12 @@ export async function buildPRChain(
 
     // If integration mode, include merged PRs in the chain for numbering
     if (options.integration) {
-        const mergedPRs = await getMergedPRs(baseBranch);
+        // Find the integration PR first to get its branch name
+        const integrationPR = Array.from(prDetails.values()).find((pr) => pr.baseRefName === baseBranch);
+        const mergedPRs = integrationPR
+            ? await getMergedPRs(integrationPR.headRefName)
+            : await getMergedPRs(baseBranch);
+
         for (const mergedPR of mergedPRs) {
             // Only add if not already in the chain
             if (!prDetails.has(mergedPR.headRefName)) {

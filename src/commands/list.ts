@@ -4,6 +4,7 @@ import { sortPRsByMergeDateOrNumber, filterPRsExcludingBaseBranch } from '../uti
 import { findIntegrationPR } from '../utils/edit-operations.js';
 import { STATUS_ICONS, MESSAGES } from '../constants/index.js';
 import { enableDebugLogging, logDebug } from '../utils/console.js';
+import { getMergedPRs } from '../services/github.js';
 
 export async function listPRChain(
     baseBranch: string,
@@ -36,16 +37,36 @@ export async function listPRChain(
     const integrationPR = findIntegrationPR(prDetails, branches, baseBranch);
     if (!integrationPR) {
         logDebug('No integration PR found');
-        console.log(chalk.yellow('⚠️  No integration branch detected'));
+        console.log(chalk.yellow('⚠️ No integration branch detected'));
         return;
     }
     logDebug(`Integration PR found: #${integrationPR.number} "${integrationPR.title}"`);
 
-    // Only show PRs that merge directly into the integration branch
-    const integrationBranchPRs = Array.from(prDetails.values()).filter(
-        (pr) => pr.baseRefName === integrationPR.headRefName
+    // Get all PRs that merge directly into the integration branch (both open and merged)
+    const integrationBranchName = integrationPR.headRefName;
+    logDebug(`Looking for PRs that merge into integration branch: ${integrationBranchName}`);
+
+    // Get merged PRs that target the integration branch
+    const mergedPRsToIntegration = await getMergedPRs(integrationBranchName);
+    logDebug(`Found ${mergedPRsToIntegration.length} merged PRs to integration branch`);
+
+    // Get open PRs that target the integration branch
+    const openPRsToIntegration = Array.from(prDetails.values()).filter(
+        (pr) => pr.baseRefName === integrationBranchName
     );
-    logDebug(`Found ${integrationBranchPRs.length} PRs that merge into integration branch`);
+    logDebug(`Found ${openPRsToIntegration.length} open PRs to integration branch`);
+
+    // Combine open and merged PRs
+    const allIntegrationBranchPRs = [...openPRsToIntegration, ...mergedPRsToIntegration];
+    logDebug(`Total PRs targeting integration branch: ${allIntegrationBranchPRs.length}`);
+
+    // Remove duplicates (in case a PR appears in both lists)
+    const uniquePRs = allIntegrationBranchPRs.filter(
+        (pr, index, array) => array.findIndex((p) => p.number === pr.number) === index
+    );
+    logDebug(`Unique PRs after deduplication: ${uniquePRs.length}`);
+
+    const integrationBranchPRs = uniquePRs;
 
     const sortedPRs = sortPRsByMergeDateOrNumber(integrationBranchPRs);
     logDebug(`Sorted PRs for display: ${sortedPRs.map((pr) => `#${pr.number}`).join(', ')}`);
