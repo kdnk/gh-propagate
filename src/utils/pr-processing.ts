@@ -1,6 +1,14 @@
 import type { PullRequest } from '../types/index.js';
 import { getMergedPRs } from '../services/github.js';
-import { sortPRsByMergeDateOrNumber } from './pr-sorting.js';
+
+function sortPRsByMergeDateOrNumber(prs: PullRequest[]): PullRequest[] {
+    return prs.sort((a, b) => {
+        if ('mergedAt' in a && 'mergedAt' in b) {
+            return new Date(a.mergedAt as string).getTime() - new Date(b.mergedAt as string).getTime();
+        }
+        return a.number - b.number;
+    });
+}
 
 /**
  * Get branches from integration branch to target branch (excluding integration branch itself)
