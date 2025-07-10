@@ -44,38 +44,53 @@ bun install -g gh-propagate
 npm install -g gh-propagate
 ```
 
-### Using Fisher (Fish shell completions)
+### Fish Shell Completions
+
+For Fish shell users, you can enable tab completion by copying the completion file:
 
 ```bash
-# Install Fish shell completions only
-fisher install kdnk/gh-propagate
+# Copy fish completion to your fish completions directory
+cp completions/gp.fish ~/.config/fish/completions/
+
+# Or if installed globally via npm/bun, find the installation path
+# and copy from there
 ```
 
-This adds Fish shell completions with tab completion for branch names. You still need to install the `gh-propagate` tool separately using npm or bun.
+The completion provides:
+- Branch name completion for the target branch argument
+- Branch name completion for `--integration` option
+- Edit operation completion for `--edit` option (title, desc)
 
 ## Usage
 
 ```bash
-gh-propagate [options] <base-branch> <target-branch>
+gp [options] <target-branch>
 ```
 
 Examples:
 
 ```bash
-gh-propagate main feature-branch
-gh-propagate --dry-run main feature-branch
-gh-propagate --list main feature-branch
-gh-propagate --edit title main feature-branch
-gh-propagate --edit title,integration main feature-branch
+# Basic propagation with auto base branch detection
+gp feature-branch
+
+# Preview what would be executed
+gp feature-branch --dry-run
+
+# Enable debug logging
+gp feature-branch --debug
+
+# Edit PR titles and descriptions in integration mode
+gp feature-branch --integration integration-branch --edit title desc
 ```
 
 ### Options
 
 - `--dry-run`, `-d`: Preview what commands would be executed without making any changes
-- `--list`, `-l`: List all PRs in the chain as markdown links with status icons
-- `--edit <operations>`, `-e <operations>`: Apply edit operations to PRs. Available operations:
+- `--edit <operations>`, `-e <operations>`: Apply edit operations to PRs (requires `--integration`). Available operations:
     - `title`: Add sequential numbering to PR titles in `[n/total]` format
-    - `integration`: Update integration PR description with PR list
+    - `desc`: Update integration PR description with PR list
+- `--integration <branch>`, `-i <branch>`: Specify integration branch for edit operations
+- `--debug`: Enable debug logging for troubleshooting
 - `--version`, `-v`: Show version information
 
 ## Features
