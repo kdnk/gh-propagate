@@ -3,6 +3,7 @@ import { buildPRChain } from '../services/pr-chain.js';
 import { executeGitCommand } from '../services/git.js';
 import { getPullRequest } from '../services/github.js';
 import { executeEditOperations } from '../utils/edit-operations.js';
+import { COMMON_BASE_BRANCHES } from '../constants/index.js';
 import {
     logChainDiscovery,
     logMergeStep,
@@ -71,6 +72,13 @@ export async function propagateChanges(
                 break;
             }
             currentBranch = pr.baseRefName;
+            
+            // Check if we've reached a common base branch
+            if (COMMON_BASE_BRANCHES.includes(currentBranch as any)) {
+                logDebug(`Reached common base branch: ${currentBranch}`);
+                baseBranch = currentBranch;
+                break;
+            }
         }
         logDebug(`Found base branch: ${baseBranch}`);
     }
