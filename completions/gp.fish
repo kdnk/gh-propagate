@@ -13,36 +13,10 @@ if type -q gp
     complete -c gp -s V -l version -d "Output the version number"
     complete -c gp -s h -l help -d "Display help for command"
 
-    # Target branch argument (first positional argument)
-    complete -c gp -n "__fish_gp_no_target_branch" -a "(__fish_gp_branches)" -d "Target branch"
+    # Target branch argument (always available)
+    complete -c gp -a "(__fish_gp_branches)" -d "Target branch"
 end
 
-# Helper function: check if target branch is not yet provided
-function __fish_gp_no_target_branch
-    set -l cmd (commandline -opc)
-    
-    # Skip the command name
-    for i in (seq 2 (count $cmd))
-        set -l arg $cmd[$i]
-        
-        # If this is not an option (doesn't start with -)
-        if not string match -q -- '-*' $arg
-            # Check if the previous argument was an option that takes a value
-            if test $i -gt 2
-                set -l prev_arg $cmd[(math $i - 1)]
-                # If previous was -i, --integration, -e, or --edit, this is the option value
-                if test "$prev_arg" = "-i"; or test "$prev_arg" = "--integration"; or test "$prev_arg" = "-e"; or test "$prev_arg" = "--edit"
-                    continue
-                end
-            end
-            # Found a target branch
-            return 1
-        end
-    end
-    
-    # No target branch found
-    return 0
-end
 
 # Helper function: get git branches
 function __fish_gp_branches
