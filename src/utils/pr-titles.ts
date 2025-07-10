@@ -64,8 +64,8 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
 
     // Get only PRs from integration branch to target branch (excluding integration branch itself)
     const targetBranches = getBranchesFromIntegrationToTarget(branches, integrationBranch);
-    console.log(`🔍 Debug - Target branches for title updates: [${targetBranches.join(', ')}]`);
-    const allChainPRs = Array.from(prDetails.values()).filter((pr) => targetBranches.includes(pr.headRefName));
+    console.log(`🔍 Debug - Excluded branches for title updates: [${targetBranches.join(', ')}]`);
+    const allChainPRs = Array.from(prDetails.values()).filter((pr) => !targetBranches.includes(pr.headRefName));
 
     // Get merged PRs that target the integration branch, but only those from target branches
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
