@@ -27,6 +27,17 @@ interface UpdateTitlesOptions {
     dryRun?: boolean;
 }
 
+function getBranchesFromIntegrationToTarget(branches: string[], integrationBranch: string): string[] {
+    const integrationIndex = branches.indexOf(integrationBranch);
+    if (integrationIndex === -1) {
+        // Integration branch not found in chain, return all branches except base
+        return branches.filter((branch) => branch !== branches[0]);
+    }
+
+    // Return branches from integration branch onwards (excluding integration branch itself)
+    return branches.slice(integrationIndex + 1);
+}
+
 export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): Promise<void> {
     const { prDetails, branches, integrationBranch, baseBranch, dryRun = false } = options;
     const prBranches = branches.filter((branch) => branch !== baseBranch);
@@ -41,10 +52,9 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
     // Get merged PRs that target the integration branch
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
 
-    // Get all PRs in the chain (excluding integration branch itself)
-    const allChainPRs = Array.from(prDetails.values()).filter(
-        (pr) => pr.headRefName !== integrationBranch && prBranches.includes(pr.headRefName)
-    );
+    // Get only PRs from integration branch to target branch (excluding integration branch itself)
+    const targetBranches = getBranchesFromIntegrationToTarget(branches, integrationBranch);
+    const allChainPRs = Array.from(prDetails.values()).filter((pr) => targetBranches.includes(pr.headRefName));
 
     // Combine chain PRs and merged PRs that target integration branch
     const allIntegrationBranchPRs = [...allChainPRs, ...mergedPRsToIntegration];
@@ -62,8 +72,8 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
         const pr = sortedPRs[i];
         if (!pr) continue;
 
-        // Only update open PRs (those in the current branch chain)
-        if (prBranches.includes(pr.headRefName)) {
+        // Only update open PRs (those from integration branch to target branch)
+        if (targetBranches.includes(pr.headRefName)) {
             const position = i + 1;
             const newTitle = addNumberPrefix(pr.title, position, total);
 
