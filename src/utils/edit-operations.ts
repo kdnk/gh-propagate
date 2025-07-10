@@ -4,6 +4,7 @@ import { updatePRTitlesWithNumbers } from './pr-titles.js';
 import { updatePRDescription, getMergedPRs } from '../services/github.js';
 import { sortPRsByMergeDateOrNumber, filterPRsExcludingBaseBranch } from './pr-sorting.js';
 import { VALID_EDIT_OPERATIONS, STATUS_ICONS, MESSAGES } from '../constants/index.js';
+import { getBranchesFromIntegrationToTarget } from './branch-filtering.js';
 
 export async function executeEditOperations(
     operations: string[],
@@ -95,17 +96,6 @@ async function updateIntegrationPRDescription(
     await updatePRDescription(integrationPR.number, newDescription, dryRun);
 }
 
-function getBranchesFromIntegrationToTarget(branches: string[], integrationBranch: string): string[] {
-    const integrationIndex = branches.indexOf(integrationBranch);
-
-    if (integrationIndex === -1) {
-        // Integration branch not found in chain, return all branches except base
-        return branches.filter((branch) => branch !== branches[0]);
-    }
-
-    // Return branches from integration branch onwards (excluding integration branch itself)
-    return branches.slice(integrationIndex + 1);
-}
 
 async function buildPRListMarkdown(
     prDetails: Map<string, PullRequest>,

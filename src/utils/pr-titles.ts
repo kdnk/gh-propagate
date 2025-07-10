@@ -3,6 +3,7 @@ import type { PullRequest } from '../types/index.js';
 import { updatePRTitle, getMergedPRs } from '../services/github.js';
 import { sortPRsByMergeDateOrNumber, filterPRsExcludingBaseBranch } from './pr-sorting.js';
 import { PR_NUMBER_PREFIX_PATTERN, MESSAGES } from '../constants/index.js';
+import { getBranchesFromIntegrationToTarget } from './branch-filtering.js';
 
 export function removeExistingNumberPrefix(title: string): string {
     return title.replace(PR_NUMBER_PREFIX_PATTERN, '');
@@ -27,17 +28,6 @@ interface UpdateTitlesOptions {
     dryRun?: boolean;
 }
 
-function getBranchesFromIntegrationToTarget(branches: string[], integrationBranch: string): string[] {
-    const integrationIndex = branches.indexOf(integrationBranch);
-
-    if (integrationIndex === -1) {
-        // Integration branch not found in chain, return all branches except base
-        return branches.filter((branch) => branch !== branches[0]);
-    }
-
-    // Return branches from integration branch onwards (excluding integration branch itself)
-    return branches.slice(integrationIndex + 1);
-}
 
 export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): Promise<void> {
     const { prDetails, branches, integrationBranch, baseBranch, dryRun = false } = options;
