@@ -102,6 +102,7 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
         );
 
         // Only update open PRs (those from integration branch to target branch)
+        console.log(`[pr-titles.ts:105] pr: `, pr);
         if (targetBranches.includes(pr.headRefName)) {
             const position = i + 1;
             const newTitle = addNumberPrefix(pr.title, position, total);
