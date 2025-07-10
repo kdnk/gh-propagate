@@ -86,10 +86,10 @@ gp feature-branch --integration integration-branch --edit title desc
 ### Options
 
 - `--dry-run`, `-d`: Preview what commands would be executed without making any changes
-- `--edit <operations>`, `-e <operations>`: Apply edit operations to PRs (requires `--integration`). Available operations:
+- `--edit <operations>`, `-e <operations>`: Apply edit operations to PRs (must be used with `--integration`). Available operations:
     - `title`: Add sequential numbering to PR titles in `[n/total]` format
     - `desc`: Update integration PR description with PR list
-- `--integration <branch>`, `-i <branch>`: Specify integration branch for edit operations
+- `--integration <branch>`, `-i <branch>`: Specify integration branch (must be used with `--edit`)
 - `--debug`: Enable debug logging for troubleshooting
 - `--version`, `-v`: Show version information
 

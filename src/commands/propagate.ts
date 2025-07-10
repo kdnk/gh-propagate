@@ -25,9 +25,14 @@ export async function propagateChanges(
         logDebug(`Options: dryRun=${dryRun}, edit=[${edit.join(', ')}], integration=${integration || 'none'}`);
     }
 
-    // Validate integration branch is required for edit operations
+    // Validate integration and edit options are used together
     if (edit.length > 0 && !integration) {
         console.error(chalk.red('❌ --integration option is required when using --edit'));
+        process.exit(1);
+    }
+    
+    if (integration && edit.length === 0) {
+        console.error(chalk.red('❌ --edit option is required when using --integration'));
         process.exit(1);
     }
 
