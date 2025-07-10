@@ -1,31 +1,37 @@
 {
-  "name": "gh-propagate",
-  "version": "0.0.15",
-  "module": "index.ts",
-  "type": "module",
-  "author": "Kodai Nakamura",
-  "bin": {
-    "gp": "./dist/gp"
-  },
-  "files": [
-    "dist",
-    "completions"
-  ],
-  "scripts": {
-    "build": "bun build src/index.ts --compile --target node --outfile dist/gp",
-    "test": "bun test",
-    "version": "bun version-bump.mts"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/chalk": "^2.2.4",
-    "@types/node": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "chalk": "^5.4.1",
-    "commander": "^14.0.0"
-  }
+    "name": "gh-propagate",
+    "version": "0.4.0",
+    "module": "index.ts",
+    "type": "module",
+    "author": "Kodai Nakamura",
+    "repository": {
+        "url": "https://github.com/kdnk/gh-propagate"
+    },
+    "bin": {
+        "gp": "./dist/gp"
+    },
+    "files": [
+        "dist",
+        "completions"
+    ],
+    "scripts": {
+        "build": "bun build src/index.ts --compile --target=bun-darwin-arm64 --outfile dist/gp",
+        "test": "bun test",
+        "version": "bun version-bump.mts",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/chalk": "^2.2.4",
+        "@types/node": "latest",
+        "prettier": "^3.6.2"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    },
+    "dependencies": {
+        "chalk": "^5.4.1",
+        "commander": "^14.0.0"
+    }
 }
