@@ -22,7 +22,7 @@ export type PullRequestWithState = OpenPullRequest | MergedPullRequest;
 
 export interface PropagateOptions {
     dryRun?: boolean;
-    edit?: string[];
+    edit?: EditOperation[];
     integration?: string;
     debug?: boolean;
 }
