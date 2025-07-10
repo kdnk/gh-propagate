@@ -45,10 +45,41 @@ export async function propagateChanges(
             );
             process.exit(1);
         }
-        baseBranch = integrationPR.baseRefName;
         logDebug(
-            `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integration} → ${baseBranch})`
+            `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integration} → ${integrationPR.baseRefName})`
         );
+        
+        // Even in integration mode, find the actual base branch by traversing the chain
+        let currentBranch = targetBranch;
+        
+        // Traverse the PR chain to find the base branch
+        while (true) {
+            const pr = await getPullRequest(currentBranch);
+            if (!pr) {
+                // No more PRs in chain, this is the base branch
+                if (currentBranch === targetBranch) {
+                    // No PR found for target branch - it's likely the base branch itself
+                    console.error(
+                        chalk.red(
+                            `❌ No pull request found for branch: ${targetBranch}. ` +
+                            `This might be the base branch already, or the branch doesn't have a PR.`
+                        )
+                    );
+                    process.exit(1);
+                }
+                baseBranch = currentBranch;
+                break;
+            }
+            currentBranch = pr.baseRefName;
+            
+            // Check if we've reached a common base branch
+            if (COMMON_BASE_BRANCHES.includes(currentBranch as any)) {
+                logDebug(`Reached common base branch: ${currentBranch}`);
+                baseBranch = currentBranch;
+                break;
+            }
+        }
+        logDebug(`Found base branch for integration mode: ${baseBranch}`);
     } else {
         // Simple propagation - find base branch by traversing the PR chain
         let currentBranch = targetBranch;
