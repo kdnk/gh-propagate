@@ -98,7 +98,7 @@ git commit -m "$(cat <<'EOF'
 <type>: <concise description>
 
 - Detailed change 1
-- Detailed change 2  
+- Detailed change 2
 - Detailed change 3
 
 <Additional context or impact>

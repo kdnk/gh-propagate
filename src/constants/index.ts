@@ -21,15 +21,7 @@ export const STATUS_ICONS = {
 } as const;
 
 // Common base branch names
-export const COMMON_BASE_BRANCHES = [
-    'master',
-    'main',
-    'beta',
-    'dev',
-    'develop',
-    'development',
-    'staging',
-] as const;
+export const COMMON_BASE_BRANCHES = ['master', 'main', 'beta', 'dev', 'develop', 'development', 'staging'] as const;
 
 // Messages
 export const MESSAGES = {

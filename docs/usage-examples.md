@@ -12,6 +12,7 @@ gp feature-step-2
 ```
 
 **What happens:**
+
 1. Discovers PR chain: `main ← feature-step-1 ← feature-step-2`
 2. Stops at `main` (common base branch)
 3. Propagates: `main` → `feature-step-1` → `feature-step-2`
@@ -24,6 +25,7 @@ gp feature-step-2 --dry-run
 ```
 
 **Output example:**
+
 ```
 🔍 Building PR chain from main to feature-step-2...
 ✅ Branch chain discovered:
@@ -47,6 +49,7 @@ gp feature-step-2 --debug
 ```
 
 **Additional output includes:**
+
 - GitHub API calls
 - Internal state changes
 - PR discovery process
@@ -62,10 +65,12 @@ gp feature-step-2 --integration integration-branch --edit title
 ```
 
 **Before:**
+
 - "Feature Step 1"
 - "Feature Step 2"
 
 **After:**
+
 - "[1/2] Feature Step 1"
 - "[2/2] Feature Step 2"
 
@@ -77,8 +82,10 @@ gp feature-step-2 --integration integration-branch --edit desc
 ```
 
 **Adds to integration PR:**
+
 ```markdown
 ## PRs
+
 - [1/2] 🔄 #123
 - [2/2] 🔄 #124
 ```
@@ -120,6 +127,7 @@ gp feature-final --integration integration-feature --edit title desc
 ```
 
 **Behavior:**
+
 1. Validates integration-feature has a PR
 2. Discovers full chain from base to feature-final
 3. Propagates entire chain
@@ -134,6 +142,7 @@ gp main
 ```
 
 **Output:**
+
 ```
 ❌ No pull request found for branch: main. This might be the base branch already, or the branch doesn't have a PR.
 ```
@@ -145,6 +154,7 @@ gp feature-step-2 --integration nonexistent-branch --edit title
 ```
 
 **Output:**
+
 ```
 ❌ Integration branch PR not found. Make sure the integration branch has a corresponding PR.
 ```
@@ -156,6 +166,7 @@ gp feature-step-2 --edit title
 ```
 
 **Output:**
+
 ```
 ❌ --integration option is required when using --edit
 ```
@@ -192,6 +203,7 @@ gp target-branch --integration integration-branch --edit title desc
 ## Common Base Branches
 
 The tool automatically recognizes these base branch names:
+
 - `main`
 - `master`
 - `dev`

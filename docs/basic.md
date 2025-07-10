@@ -93,8 +93,8 @@ The tool automatically detects the base branch by:
 1. Starting from the target branch
 2. Following PR base relationships backwards
 3. Stopping when reaching:
-   - A common base branch name (`main`, `master`, `dev`, `develop`, `beta`, `staging`)
-   - A branch without an associated PR
+    - A common base branch name (`main`, `master`, `dev`, `develop`, `beta`, `staging`)
+    - A branch without an associated PR
 
 ### Consistent Propagation Behavior
 

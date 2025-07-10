@@ -57,6 +57,7 @@ cp completions/gp.fish ~/.config/fish/completions/
 ```
 
 The completion provides:
+
 - Branch name completion for the target branch argument
 - Branch name completion for `--integration` option
 - Edit operation completion for `--edit` option (title, desc)

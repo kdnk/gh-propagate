@@ -30,7 +30,7 @@ export async function propagateChanges(
         console.error(chalk.red('❌ --integration option is required when using --edit'));
         process.exit(1);
     }
-    
+
     if (integration && edit.length === 0) {
         console.error(chalk.red('❌ --edit option is required when using --integration'));
         process.exit(1);
@@ -53,10 +53,10 @@ export async function propagateChanges(
         logDebug(
             `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integration} → ${integrationPR.baseRefName})`
         );
-        
+
         // Even in integration mode, find the actual base branch by traversing the chain
         let currentBranch = targetBranch;
-        
+
         // Traverse the PR chain to find the base branch
         while (true) {
             const pr = await getPullRequest(currentBranch);
@@ -67,7 +67,7 @@ export async function propagateChanges(
                     console.error(
                         chalk.red(
                             `❌ No pull request found for branch: ${targetBranch}. ` +
-                            `This might be the base branch already, or the branch doesn't have a PR.`
+                                `This might be the base branch already, or the branch doesn't have a PR.`
                         )
                     );
                     process.exit(1);
@@ -76,7 +76,7 @@ export async function propagateChanges(
                 break;
             }
             currentBranch = pr.baseRefName;
-            
+
             // Check if we've reached a common base branch
             if (COMMON_BASE_BRANCHES.includes(currentBranch as any)) {
                 logDebug(`Reached common base branch: ${currentBranch}`);
@@ -88,7 +88,7 @@ export async function propagateChanges(
     } else {
         // Simple propagation - find base branch by traversing the PR chain
         let currentBranch = targetBranch;
-        
+
         // Traverse the PR chain to find the base branch
         while (true) {
             const pr = await getPullRequest(currentBranch);
@@ -99,7 +99,7 @@ export async function propagateChanges(
                     console.error(
                         chalk.red(
                             `❌ No pull request found for branch: ${targetBranch}. ` +
-                            `This might be the base branch already, or the branch doesn't have a PR.`
+                                `This might be the base branch already, or the branch doesn't have a PR.`
                         )
                     );
                     process.exit(1);
@@ -108,7 +108,7 @@ export async function propagateChanges(
                 break;
             }
             currentBranch = pr.baseRefName;
-            
+
             // Check if we've reached a common base branch
             if (COMMON_BASE_BRANCHES.includes(currentBranch as any)) {
                 logDebug(`Reached common base branch: ${currentBranch}`);

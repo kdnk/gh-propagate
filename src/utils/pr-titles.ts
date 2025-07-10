@@ -38,16 +38,6 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
 
     console.log(chalk.blue(`\n${MESSAGES.UPDATING_PR_TITLES}`));
 
-    await updatePRTitlesInIntegrationMode(prDetails, prBranches, integrationBranch, baseBranch, dryRun);
-}
-
-async function updatePRTitlesInIntegrationMode(
-    prDetails: Map<string, PullRequest>,
-    prBranches: string[],
-    integrationBranch: string,
-    baseBranch: string,
-    dryRun: boolean
-): Promise<void> {
     // Get merged PRs that target the integration branch
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
 
