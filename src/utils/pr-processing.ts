@@ -35,8 +35,10 @@ export async function getIntegrationPRsForProcessing(
     baseBranch: string
 ): Promise<PullRequest[]> {
     const excludedBranches = getBranchesFromIntegrationToTarget(branches, integrationBranch);
+    console.log(`[pr-processing.ts:37] excludedBranches: `, excludedBranches);
     const allChainPRs = Array.from(prDetails.values()).filter((pr) => !excludedBranches.includes(pr.headRefName));
     const targetBranches = allChainPRs.map((pr) => pr.headRefName);
+    console.log(`[pr-processing.ts:41] targetBranches: `, targetBranches);
 
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
     const filteredMergedPRs = mergedPRsToIntegration.filter((pr) => targetBranches.includes(pr.headRefName));
