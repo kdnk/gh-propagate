@@ -44,5 +44,7 @@ export async function getIntegrationPRsForProcessing(
     const allPRs = [...allChainPRs, ...filteredMergedPRs];
     const uniquePRs = allPRs.filter((pr, index, array) => array.findIndex((p) => p.number === pr.number) === index);
 
-    return sortPRsByMergeDateOrNumber(uniquePRs);
+    const a = sortPRsByMergeDateOrNumber(uniquePRs);
+    console.log(`[pr-processing.ts:48] a: `, a);
+    return a;
 }
