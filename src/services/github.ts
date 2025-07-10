@@ -55,17 +55,19 @@ export async function updatePRTitle(prNumber: number, newTitle: string, dryRun: 
 export async function updatePRDescription(
     prNumber: number,
     newDescription: string,
-    dryRun: boolean = false
+    dryRun: boolean = false,
+    url?: string
 ): Promise<boolean> {
     try {
         logDebug(`Updating PR #${prNumber} description (${newDescription.length} characters)`);
+        const urlSuffix = url ? ` ${url}` : '';
         if (dryRun) {
-            logDryRun('Would update PR description', `#${prNumber}`);
+            logDryRun('Would update PR description', `#${prNumber}${urlSuffix}`);
             return true;
         } else {
             logAPICall(`gh pr edit ${prNumber} --body`);
             await $`gh pr edit ${prNumber} --body ${newDescription}`.quiet();
-            console.log(chalk.green(`✅ Updated integration PR #${prNumber} description`));
+            console.log(chalk.green(`✅ Updated integration PR #${prNumber} description${urlSuffix}`));
             logDebug(`Successfully updated PR #${prNumber} description`);
             return true;
         }

@@ -14,7 +14,6 @@ import {
 } from '../utils/console.js';
 import type { PropagateOptions, ChainInfo } from '../types/index.js';
 
-
 function validateAndSetupLogging(targetBranch: string, options: PropagateOptions): void {
     const { dryRun = false, edit = [], integration, debug = false } = options;
 

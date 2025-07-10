@@ -91,7 +91,7 @@ async function updateIntegrationPRDescription(
     const currentDescription = integrationPR.body || '';
     const newDescription = updateDescriptionWithPRList(currentDescription, prList);
 
-    await updatePRDescription(integrationPR.number, newDescription, dryRun);
+    await updatePRDescription(integrationPR.number, newDescription, dryRun, integrationPR.url);
 }
 
 async function buildPRListMarkdown(
