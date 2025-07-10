@@ -3,7 +3,7 @@ import { buildPRChain } from '../services/pr-chain.js';
 import { executeGitCommand } from '../services/git.js';
 import { getPullRequest } from '../services/github.js';
 import { executeEditOperations } from '../utils/edit-operations.js';
-import { COMMON_BASE_BRANCHES } from '../constants/index.js';
+import { findBaseBranch } from '../utils/chain-traversal.js';
 import {
     logChainDiscovery,
     logMergeStep,
@@ -13,10 +13,21 @@ import {
     logDebug,
 } from '../utils/console.js';
 
-export async function propagateChanges(
-    targetBranch: string,
-    options: { dryRun?: boolean; edit?: string[]; integration?: string; debug?: boolean } = {}
-): Promise<void> {
+interface PropagateOptions {
+    dryRun?: boolean;
+    edit?: string[];
+    integration?: string;
+    debug?: boolean;
+}
+
+interface PropagateContext {
+    targetBranch: string;
+    options: PropagateOptions;
+    baseBranch: string;
+    integrationPR: any;
+}
+
+function validateAndSetupLogging(targetBranch: string, options: PropagateOptions): void {
     const { dryRun = false, edit = [], integration, debug = false } = options;
 
     if (debug) {
@@ -35,93 +46,39 @@ export async function propagateChanges(
         console.error(chalk.red('❌ --edit option is required when using --integration'));
         process.exit(1);
     }
+}
 
-    let baseBranch: string;
-    let integrationPR: any = null;
-
-    if (integration) {
-        // Integration branch specified - validate it has a corresponding PR
-        integrationPR = await getPullRequest(integration);
-        if (!integrationPR) {
-            console.error(
-                chalk.red(
-                    '❌ Integration branch PR not found. Make sure the integration branch has a corresponding PR.'
-                )
-            );
-            process.exit(1);
-        }
-        logDebug(
-            `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integration} → ${integrationPR.baseRefName})`
+async function validateIntegrationPR(integration: string): Promise<any> {
+    const integrationPR = await getPullRequest(integration);
+    if (!integrationPR) {
+        console.error(
+            chalk.red('❌ Integration branch PR not found. Make sure the integration branch has a corresponding PR.')
         );
-
-        // Even in integration mode, find the actual base branch by traversing the chain
-        let currentBranch = targetBranch;
-
-        // Traverse the PR chain to find the base branch
-        while (true) {
-            const pr = await getPullRequest(currentBranch);
-            if (!pr) {
-                // No more PRs in chain, this is the base branch
-                if (currentBranch === targetBranch) {
-                    // No PR found for target branch - it's likely the base branch itself
-                    console.error(
-                        chalk.red(
-                            `❌ No pull request found for branch: ${targetBranch}. ` +
-                                `This might be the base branch already, or the branch doesn't have a PR.`
-                        )
-                    );
-                    process.exit(1);
-                }
-                baseBranch = currentBranch;
-                break;
-            }
-            currentBranch = pr.baseRefName;
-
-            // Check if we've reached a common base branch
-            if (COMMON_BASE_BRANCHES.includes(currentBranch as any)) {
-                logDebug(`Reached common base branch: ${currentBranch}`);
-                baseBranch = currentBranch;
-                break;
-            }
-        }
-        logDebug(`Found base branch for integration mode: ${baseBranch}`);
-    } else {
-        // Simple propagation - find base branch by traversing the PR chain
-        let currentBranch = targetBranch;
-
-        // Traverse the PR chain to find the base branch
-        while (true) {
-            const pr = await getPullRequest(currentBranch);
-            if (!pr) {
-                // No more PRs in chain, this is the base branch
-                if (currentBranch === targetBranch) {
-                    // No PR found for target branch - it's likely the base branch itself
-                    console.error(
-                        chalk.red(
-                            `❌ No pull request found for branch: ${targetBranch}. ` +
-                                `This might be the base branch already, or the branch doesn't have a PR.`
-                        )
-                    );
-                    process.exit(1);
-                }
-                baseBranch = currentBranch;
-                break;
-            }
-            currentBranch = pr.baseRefName;
-
-            // Check if we've reached a common base branch
-            if (COMMON_BASE_BRANCHES.includes(currentBranch as any)) {
-                logDebug(`Reached common base branch: ${currentBranch}`);
-                baseBranch = currentBranch;
-                break;
-            }
-        }
-        logDebug(`Found base branch: ${baseBranch}`);
+        process.exit(1);
     }
+    logDebug(
+        `Integration PR found: #${integrationPR.number} "${integrationPR.title}" (${integration} → ${integrationPR.baseRefName})`
+    );
+    return integrationPR;
+}
 
+async function determineBaseBranch(targetBranch: string, integration?: string): Promise<string> {
+    if (integration) {
+        return await findBaseBranch({ targetBranch, integrationMode: true });
+    } else {
+        return await findBaseBranch({ targetBranch, integrationMode: false });
+    }
+}
+
+interface ChainInfo {
+    branches: string[];
+    prUrls: Map<string, string>;
+    prDetails: Map<string, any>;
+}
+
+async function buildChainInfo(targetBranch: string, baseBranch: string, integration?: string): Promise<ChainInfo> {
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
-    // Include merged PRs only if integration is specified
     logDebug(`Building PR chain with integration mode: ${!!integration}`);
     const { branches, prUrls, prDetails } = await buildPRChain(targetBranch, baseBranch, {
         integration: !!integration,
@@ -131,11 +88,11 @@ export async function propagateChanges(
 
     logChainDiscovery(branches);
 
-    if (edit.length > 0 && integration) {
-        logDebug(`Executing ${edit.length} edit operations: [${edit.join(', ')}]`);
-        await executeEditOperations(edit, prDetails, branches, integration, baseBranch, dryRun);
-    }
+    return { branches, prUrls, prDetails };
+}
 
+async function executeMergeChain(chainInfo: ChainInfo, dryRun: boolean): Promise<void> {
+    const { branches, prUrls } = chainInfo;
     const reversedChain = [...branches].reverse();
     logDebug(`Processing merge chain in reverse order: [${reversedChain.join(', ')}]`);
 
@@ -163,6 +120,27 @@ export async function propagateChanges(
         await executeGitCommand(`git merge --no-ff ${sourceBranch}`, dryRun);
         await executeGitCommand(`git push`, dryRun);
     }
+}
+
+export async function propagateChanges(targetBranch: string, options: PropagateOptions = {}): Promise<void> {
+    const { dryRun = false, edit = [], integration, debug = false } = options;
+
+    validateAndSetupLogging(targetBranch, options);
+
+    let integrationPR: any = null;
+    if (integration) {
+        integrationPR = await validateIntegrationPR(integration);
+    }
+
+    const baseBranch = await determineBaseBranch(targetBranch, integration);
+
+    const chainInfo = await buildChainInfo(targetBranch, baseBranch, integration);
+
+    if (edit.length > 0 && integration) {
+        await executeEditOperations(edit, chainInfo.prDetails, chainInfo.branches, integration, baseBranch, dryRun);
+    }
+
+    await executeMergeChain(chainInfo, dryRun);
 
     logCompletionMessage(targetBranch, dryRun);
 }
