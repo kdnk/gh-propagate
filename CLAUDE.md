@@ -4,6 +4,7 @@
 - Avoid using TypeScript non-null assertion operator (`!`) - use proper type guards instead
 - Use `bun` instead of `npm` for package management and script execution
 - Run `bun run format` to format code, `bun run format:check` to check formatting
+- Use `say` command to notify me when you are done for each session
 
 ## gh-propagate Implementation Notes
 
