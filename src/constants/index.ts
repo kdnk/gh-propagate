@@ -20,6 +20,17 @@ export const STATUS_ICONS = {
     OPEN_EMOJI: '🔄',
 } as const;
 
+// Common base branch names
+export const COMMON_BASE_BRANCHES = [
+    'master',
+    'main',
+    'beta',
+    'dev',
+    'develop',
+    'development',
+    'staging',
+] as const;
+
 // Messages
 export const MESSAGES = {
     NO_PRS_FOUND: 'No PRs found in chain',
