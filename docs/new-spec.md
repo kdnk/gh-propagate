@@ -18,7 +18,6 @@ All features listed below have been successfully implemented and tested.
 
 ### Integration Mode ✅
 - **Full Chain Propagation**: Integration mode now propagates the complete PR chain from base to target
-- `gp target-branch --integration integration-branch --list` displays PR chain with status icons
 - Includes already merged PRs limited to those directly merged into the integration branch
 - Fails if integration branch doesn't have a corresponding PR
 

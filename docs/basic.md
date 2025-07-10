@@ -40,7 +40,6 @@ gp <target-branch> [options]
 Available options:
 
 - `--dry-run, -d`: Preview operations without executing
-- `--list, -l`: List PR chain with status icons (requires `--integration`)
 - `--edit <operations>, -e`: Edit PR attributes - available: `title`, `desc` (requires `--integration`)
 - `--integration <branch>, -i`: Specify integration branch for advanced operations
 - `--debug`: Enable debug logging for troubleshooting
@@ -64,9 +63,6 @@ gp feature-step-2 --debug
 ### Integration Mode
 
 ```bash
-# List PRs in integration chain
-gp feature-step-2 --integration integration-branch --list
-
 # Update PR titles with numbering
 gp feature-step-2 --integration integration-branch --edit title
 
@@ -86,7 +82,7 @@ gp feature-step-2 --integration integration-branch --edit title desc
 - **Smart PR chain traversal**: Automatically finds the base by following PR relationships
 - Status tracking with icons (🔄 for open, ✅ for merged)
 - **Full chain propagation**: Always propagates from detected base to target, even in integration mode
-- Filters PRs to show only those directly merged into integration branch (integration mode only)
+- Edit operations for PR titles and descriptions (integration mode only)
 
 ## Key Features
 

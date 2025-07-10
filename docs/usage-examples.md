@@ -54,21 +54,6 @@ gp feature-step-2 --debug
 
 ## Integration Mode Examples
 
-### List PR Chain
-
-```bash
-# Display PR chain with status icons
-gp feature-step-2 --integration integration-branch --list
-```
-
-**Output example:**
-```
-🔗 PR Chain for integration-branch:
-   🔄 #123 Feature Step 1 (feature-step-1 → main)
-   🔄 #124 Feature Step 2 (feature-step-2 → feature-step-1)
-   ✅ #125 Merged Feature (merged-feature → main)
-```
-
 ### Update PR Titles
 
 ```bash
@@ -156,7 +141,7 @@ gp main
 ### Invalid Integration Branch
 
 ```bash
-gp feature-step-2 --integration nonexistent-branch --list
+gp feature-step-2 --integration nonexistent-branch --edit title
 ```
 
 **Output:**
@@ -167,12 +152,12 @@ gp feature-step-2 --integration nonexistent-branch --list
 ### Missing Integration Flag
 
 ```bash
-gp feature-step-2 --list
+gp feature-step-2 --edit title
 ```
 
 **Output:**
 ```
-❌ --integration option is required when using --list
+❌ --integration option is required when using --edit
 ```
 
 ## Best Practices
@@ -202,14 +187,6 @@ Use integration mode for PR management:
 gp target-branch --integration integration-branch --edit title desc --dry-run
 # Review the plan, then execute without --dry-run
 gp target-branch --integration integration-branch --edit title desc
-```
-
-### 4. Check PR Lists
-
-Review PRs before propagation:
-
-```bash
-gp target-branch --integration integration-branch --list
 ```
 
 ## Common Base Branches
