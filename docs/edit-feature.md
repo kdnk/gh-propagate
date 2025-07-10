@@ -10,15 +10,17 @@ Add an option to automatically edit PR attributes with various modifications. Cu
 
 - `--edit <operations...>` or `-e <operations...>`
 - Accepts one or more edit operation names as arguments
-- Available operations: `title`, `integration`
+- Available operations: `title`, `desc`
+- Requires `--integration` flag to be specified
 
 ### Behavior
 
 When the `--edit` flag is provided with operations:
 
-1. **Discovery Phase**: Build the PR chain as usual from base branch to target branch
-2. **Validation**: Validate that all specified operations are supported
-3. **Edit Operations**: Apply each specified edit operation to PRs in the chain
+1. **Discovery Phase**: Build the PR chain from auto-detected base branch to target branch
+2. **Validation**: Validate that all specified operations are supported and integration branch is specified
+3. **Propagation**: Execute full chain propagation from base to target
+4. **Edit Operations**: Apply each specified edit operation to PRs in the chain
 
 ## Current Features
 
@@ -26,11 +28,11 @@ When the `--edit` flag is provided with operations:
 
 Automatically prefix PR titles with sequential numbers in the format `[n/total]` where `n` is the position in the PR chain and `total` is the total number of PRs in the chain.
 
-### Integration PR Description (`integration` operation)
+### Integration PR Description (`desc` operation)
 
-Updates the integration PR (the first PR in the chain that merges into the base branch) with a "## PRs" section containing a simplified list of only the PRs that are directly merged into the integration branch, with status icons but no links.
+Updates the integration PR with a "## PRs" section containing a simplified list of only the PRs that are directly merged into the integration branch, with status icons but no links.
 
-**Logic for Integration Operation**:
+**Logic for Description Operation**:
 
 - Find the integration PR (first PR in chain merging to base branch)
 - Filter PRs to include only those directly merged into the integration branch (not the entire chain)
