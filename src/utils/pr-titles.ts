@@ -49,15 +49,16 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
 
     console.log(chalk.blue(`\n${MESSAGES.UPDATING_PR_TITLES}`));
 
-    // Get merged PRs that target the integration branch
-    const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
-
     // Get only PRs from integration branch to target branch (excluding integration branch itself)
     const targetBranches = getBranchesFromIntegrationToTarget(branches, integrationBranch);
     const allChainPRs = Array.from(prDetails.values()).filter((pr) => targetBranches.includes(pr.headRefName));
 
-    // Combine chain PRs and merged PRs that target integration branch
-    const allIntegrationBranchPRs = [...allChainPRs, ...mergedPRsToIntegration];
+    // Get merged PRs that target the integration branch, but only those from target branches
+    const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
+    const filteredMergedPRs = mergedPRsToIntegration.filter((pr) => targetBranches.includes(pr.headRefName));
+
+    // Combine chain PRs and filtered merged PRs that target integration branch
+    const allIntegrationBranchPRs = [...allChainPRs, ...filteredMergedPRs];
 
     // Remove duplicates (in case a PR appears in both lists)
     const uniquePRs = allIntegrationBranchPRs.filter(
