@@ -16,7 +16,7 @@ async function main(): Promise<void> {
         .argument('<target-branch>', 'The target branch to propagate changes to')
         .option('-d, --dry-run', 'Show what would be executed without making changes', false)
         .option('-e, --edit <operations...>', 'Edit PR attributes. Available: title, desc', [])
-        .option('-i, --integration <branch>', 'Specify integration branch for list/edit operations')
+        .option('-i, --integration <branch>', 'Specify integration branch for edit operations')
         .option('--debug', 'Enable debug logging', false)
         .action(async (targetBranch: string, options: PropagateOptions) => {
             try {

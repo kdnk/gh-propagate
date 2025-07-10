@@ -41,7 +41,7 @@ Available options:
 
 - `--dry-run, -d`: Preview operations without executing
 - `--edit <operations>, -e`: Edit PR attributes - available: `title`, `desc` (requires `--integration`)
-- `--integration <branch>, -i`: Specify integration branch for advanced operations
+- `--integration <branch>, -i`: Specify integration branch for edit operations
 - `--debug`: Enable debug logging for troubleshooting
 - `--version, -v`: Show version
 
