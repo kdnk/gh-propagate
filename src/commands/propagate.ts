@@ -51,24 +51,22 @@ export async function propagateChanges(
     } else {
         // Simple propagation - find base branch by traversing the PR chain
         let currentBranch = targetBranch;
-        const targetPR = await getPullRequest(currentBranch);
-        
-        if (!targetPR) {
-            // No PR found for target branch - it's likely the base branch itself
-            console.error(
-                chalk.red(
-                    `❌ No pull request found for branch: ${targetBranch}. ` +
-                    `This might be the base branch already, or the branch doesn't have a PR.`
-                )
-            );
-            process.exit(1);
-        }
         
         // Traverse the PR chain to find the base branch
         while (true) {
             const pr = await getPullRequest(currentBranch);
             if (!pr) {
                 // No more PRs in chain, this is the base branch
+                if (currentBranch === targetBranch) {
+                    // No PR found for target branch - it's likely the base branch itself
+                    console.error(
+                        chalk.red(
+                            `❌ No pull request found for branch: ${targetBranch}. ` +
+                            `This might be the base branch already, or the branch doesn't have a PR.`
+                        )
+                    );
+                    process.exit(1);
+                }
                 baseBranch = currentBranch;
                 break;
             }
