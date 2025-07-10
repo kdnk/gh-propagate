@@ -1,7 +1,7 @@
 import { $ } from 'bun';
 import type { PullRequest } from '../types/index.js';
 import chalk from 'chalk';
-import { logAPICall, logDebug } from '../utils/console.js';
+import { logAPICall, logDebug, formatErrorMessage, logDryRun } from '../utils/console.js';
 
 export async function getPullRequest(branch: string): Promise<PullRequest | null> {
     try {
@@ -11,7 +11,7 @@ export async function getPullRequest(branch: string): Promise<PullRequest | null
         logDebug(`Retrieved PR for branch ${branch}: #${pr.number} "${pr.title}" (${pr.state})`);
         return pr;
     } catch (error) {
-        logDebug(`No PR found for branch ${branch}: ${error instanceof Error ? error.message : String(error)}`);
+        logDebug(`No PR found for branch ${branch}: ${formatErrorMessage(error)}`);
         return null;
     }
 }
@@ -27,7 +27,7 @@ export async function getMergedPRs(baseBranch: string): Promise<PullRequest[]> {
         return sortedPrs;
     } catch (error) {
         console.error('Failed to get merged PRs:', error);
-        logDebug(`Failed to retrieve merged PRs: ${error instanceof Error ? error.message : String(error)}`);
+        logDebug(`Failed to retrieve merged PRs: ${formatErrorMessage(error)}`);
         return [];
     }
 }
@@ -36,7 +36,7 @@ export async function updatePRTitle(prNumber: number, newTitle: string, dryRun: 
     try {
         logDebug(`Updating PR #${prNumber} title to: "${newTitle}"`);
         if (dryRun) {
-            console.log(chalk.yellow(`[DRY RUN] Would update PR #${prNumber} title to: "${newTitle}"`));
+            logDryRun('Would update PR title', `#${prNumber} to: "${newTitle}"`);
             return true;
         } else {
             logAPICall(`gh pr edit ${prNumber} --title`);
@@ -46,11 +46,8 @@ export async function updatePRTitle(prNumber: number, newTitle: string, dryRun: 
             return true;
         }
     } catch (error) {
-        console.error(
-            `❌ Failed to update PR #${prNumber} title:`,
-            error instanceof Error ? error.message : String(error)
-        );
-        logDebug(`Failed to update PR #${prNumber} title: ${error instanceof Error ? error.message : String(error)}`);
+        console.error(`❌ Failed to update PR #${prNumber} title:`, formatErrorMessage(error));
+        logDebug(`Failed to update PR #${prNumber} title: ${formatErrorMessage(error)}`);
         return false;
     }
 }
@@ -63,7 +60,7 @@ export async function updatePRDescription(
     try {
         logDebug(`Updating PR #${prNumber} description (${newDescription.length} characters)`);
         if (dryRun) {
-            console.log(chalk.yellow(`[DRY RUN] Would update PR #${prNumber} description`));
+            logDryRun('Would update PR description', `#${prNumber}`);
             return true;
         } else {
             logAPICall(`gh pr edit ${prNumber} --body`);
@@ -73,13 +70,8 @@ export async function updatePRDescription(
             return true;
         }
     } catch (error) {
-        console.error(
-            `❌ Failed to update PR #${prNumber} description:`,
-            error instanceof Error ? error.message : String(error)
-        );
-        logDebug(
-            `Failed to update PR #${prNumber} description: ${error instanceof Error ? error.message : String(error)}`
-        );
+        console.error(`❌ Failed to update PR #${prNumber} description:`, formatErrorMessage(error));
+        logDebug(`Failed to update PR #${prNumber} description: ${formatErrorMessage(error)}`);
         return false;
     }
 }

@@ -59,3 +59,11 @@ export function logAPICall(endpoint: string, method: string = 'GET'): void {
         console.log(chalk.gray(`🌐 [API] ${method} ${endpoint}`));
     }
 }
+
+export function formatErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+}
+
+export function logDryRun(action: string, details: string): void {
+    console.log(chalk.yellow(`[DRY RUN] ${action}: ${details}`));
+}

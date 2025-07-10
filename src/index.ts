@@ -5,6 +5,7 @@ import { Command } from 'commander';
 import type { PropagateOptions } from './types/index.js';
 import { propagateChanges } from './commands/propagate.js';
 import { VERSION } from './constants/index.js';
+import { formatErrorMessage } from './utils/console.js';
 
 async function main(): Promise<void> {
     const program = new Command();
@@ -31,7 +32,7 @@ async function main(): Promise<void> {
                     debug: options.debug,
                 });
             } catch (error) {
-                console.error(chalk.red('❌ Error:'), error instanceof Error ? error.message : String(error));
+                console.error(chalk.red('❌ Error:'), formatErrorMessage(error));
                 process.exit(1);
             }
         });

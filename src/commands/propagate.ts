@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { buildPRChain } from '../services/pr-chain.js';
-import { executeGitCommand } from '../services/git.js';
+import { executeGitCommand, executeMergeOperation } from '../services/git.js';
 import { getPullRequest } from '../services/github.js';
 import { executeEditOperations } from '../utils/edit-operations.js';
 import { findBaseBranch } from '../utils/chain-traversal.js';
@@ -12,13 +12,7 @@ import {
     enableDebugLogging,
     logDebug,
 } from '../utils/console.js';
-
-interface PropagateOptions {
-    dryRun?: boolean;
-    edit?: string[];
-    integration?: string;
-    debug?: boolean;
-}
+import type { PropagateOptions, ChainInfo } from '../types/index.js';
 
 interface PropagateContext {
     targetBranch: string;
@@ -70,12 +64,6 @@ async function determineBaseBranch(targetBranch: string, integration?: string): 
     }
 }
 
-interface ChainInfo {
-    branches: string[];
-    prUrls: Map<string, string>;
-    prDetails: Map<string, any>;
-}
-
 async function buildChainInfo(targetBranch: string, baseBranch: string, integration?: string): Promise<ChainInfo> {
     console.log(chalk.blue(`🔍 Building PR chain from ${chalk.cyan(baseBranch)} to ${chalk.cyan(targetBranch)}...`));
 
@@ -113,12 +101,7 @@ async function executeMergeChain(chainInfo: ChainInfo, dryRun: boolean): Promise
             logDebug(`Target PR URL: ${targetUrl}`);
         }
 
-        await executeGitCommand(`git switch ${sourceBranch}`, dryRun);
-        await executeGitCommand(`git pull`, dryRun);
-        await executeGitCommand(`git switch ${targetBranchStep}`, dryRun);
-        await executeGitCommand(`git pull`, dryRun);
-        await executeGitCommand(`git merge --no-ff ${sourceBranch}`, dryRun);
-        await executeGitCommand(`git push`, dryRun);
+        await executeMergeOperation(sourceBranch, targetBranchStep, dryRun);
     }
 }
 
