@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { buildPRChain } from '../services/pr-chain.js';
-import { executeGitCommand, executeMergeOperation } from '../services/git.js';
+import { executeMergeOperation } from '../services/git.js';
 import { getPullRequest } from '../services/github.js';
 import { executeEditOperations } from '../utils/edit-operations.js';
 import { findBaseBranch } from '../utils/chain-traversal.js';
@@ -14,12 +14,6 @@ import {
 } from '../utils/console.js';
 import type { PropagateOptions, ChainInfo } from '../types/index.js';
 
-interface PropagateContext {
-    targetBranch: string;
-    options: PropagateOptions;
-    baseBranch: string;
-    integrationPR: any;
-}
 
 function validateAndSetupLogging(targetBranch: string, options: PropagateOptions): void {
     const { dryRun = false, edit = [], integration, debug = false } = options;
@@ -106,13 +100,12 @@ async function executeMergeChain(chainInfo: ChainInfo, dryRun: boolean): Promise
 }
 
 export async function propagateChanges(targetBranch: string, options: PropagateOptions = {}): Promise<void> {
-    const { dryRun = false, edit = [], integration, debug = false } = options;
+    const { dryRun = false, edit = [], integration } = options;
 
     validateAndSetupLogging(targetBranch, options);
 
-    let integrationPR: any = null;
     if (integration) {
-        integrationPR = await validateIntegrationPR(integration);
+        await validateIntegrationPR(integration);
     }
 
     const baseBranch = await determineBaseBranch(targetBranch, integration);

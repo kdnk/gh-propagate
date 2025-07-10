@@ -58,7 +58,7 @@ async function executeEditOperation(
             });
             break;
         case 'desc':
-            await updateIntegrationPRDescription(prDetails, branches, integrationBranch, baseBranch, dryRun);
+            await updateIntegrationPRDescription(prDetails, branches, integrationBranch, dryRun);
             break;
         default:
             console.error(chalk.red(`❌ Unknown edit operation: ${operation}`));
@@ -69,7 +69,6 @@ async function updateIntegrationPRDescription(
     prDetails: Map<string, PullRequest>,
     branches: string[],
     integrationBranch: string,
-    baseBranch: string,
     dryRun: boolean
 ): Promise<void> {
     console.log(chalk.blue(`\n${MESSAGES.UPDATING_INTEGRATION_PR}`));
@@ -82,7 +81,7 @@ async function updateIntegrationPRDescription(
     }
 
     // Build PR list
-    const prList = await buildPRListMarkdown(prDetails, branches, integrationBranch, baseBranch);
+    const prList = await buildPRListMarkdown(prDetails, branches, integrationBranch);
 
     // Display the PR list content on console
     console.log(chalk.yellow('📋 PR List that will be added to description:'));
@@ -98,10 +97,9 @@ async function updateIntegrationPRDescription(
 async function buildPRListMarkdown(
     prDetails: Map<string, PullRequest>,
     branches: string[],
-    integrationBranch: string,
-    baseBranch: string
+    integrationBranch: string
 ): Promise<string> {
-    const sortedPRs = await getIntegrationPRsForProcessing(prDetails, branches, integrationBranch, baseBranch);
+    const sortedPRs = await getIntegrationPRsForProcessing(prDetails, branches, integrationBranch);
     const total = sortedPRs.length;
 
     return sortedPRs

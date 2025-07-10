@@ -31,16 +31,13 @@ function getBranchesFromIntegrationToTarget(branches: string[], integrationBranc
 export async function getIntegrationPRsForProcessing(
     prDetails: Map<string, PullRequest>,
     branches: string[],
-    integrationBranch: string,
-    baseBranch: string
+    integrationBranch: string
 ): Promise<PullRequest[]> {
     const excludedBranches = getBranchesFromIntegrationToTarget(branches, integrationBranch);
-    console.log(`[pr-processing.ts:37] excludedBranches: `, excludedBranches);
     const allChainPRs = Array.from(prDetails.values()).filter(
         (pr) => !excludedBranches.includes(pr.headRefName) && pr.headRefName !== integrationBranch
     );
     const targetBranches = allChainPRs.map((pr) => pr.headRefName);
-    console.log(`[pr-processing.ts:41] targetBranches: `, targetBranches);
 
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
     const filteredMergedPRs = mergedPRsToIntegration.filter((pr) => targetBranches.includes(pr.headRefName));
@@ -48,7 +45,5 @@ export async function getIntegrationPRsForProcessing(
     const allPRs = [...allChainPRs, ...filteredMergedPRs];
     const uniquePRs = allPRs.filter((pr, index, array) => array.findIndex((p) => p.number === pr.number) === index);
 
-    const a = sortPRsByMergeDateOrNumber(uniquePRs);
-    console.log(`[pr-processing.ts:48] a: `, a);
-    return a;
+    return sortPRsByMergeDateOrNumber(uniquePRs);
 }

@@ -38,7 +38,7 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
 
     console.log(chalk.blue(`\n${MESSAGES.UPDATING_PR_TITLES}`));
 
-    const sortedPRs = await getIntegrationPRsForProcessing(prDetails, branches, integrationBranch, baseBranch);
+    const sortedPRs = await getIntegrationPRsForProcessing(prDetails, branches, integrationBranch);
     const targetBranches = sortedPRs.map((pr) => pr.headRefName);
     const total = sortedPRs.length;
     let successCount = 0;
