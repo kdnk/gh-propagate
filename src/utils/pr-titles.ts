@@ -41,11 +41,13 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
     // Get merged PRs that target the integration branch
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
 
-    // Get open PRs that target the integration branch
-    const openPRsToIntegration = Array.from(prDetails.values()).filter((pr) => pr.baseRefName === integrationBranch);
+    // Get all PRs in the chain (excluding integration branch itself)
+    const allChainPRs = Array.from(prDetails.values()).filter(
+        (pr) => pr.headRefName !== integrationBranch && prBranches.includes(pr.headRefName)
+    );
 
-    // Combine open and merged PRs
-    const allIntegrationBranchPRs = [...openPRsToIntegration, ...mergedPRsToIntegration];
+    // Combine chain PRs and merged PRs that target integration branch
+    const allIntegrationBranchPRs = [...allChainPRs, ...mergedPRsToIntegration];
 
     // Remove duplicates (in case a PR appears in both lists)
     const uniquePRs = allIntegrationBranchPRs.filter(
