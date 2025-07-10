@@ -95,6 +95,18 @@ async function updateIntegrationPRDescription(
     await updatePRDescription(integrationPR.number, newDescription, dryRun);
 }
 
+function getBranchesFromIntegrationToTarget(branches: string[], integrationBranch: string): string[] {
+    const integrationIndex = branches.indexOf(integrationBranch);
+
+    if (integrationIndex === -1) {
+        // Integration branch not found in chain, return all branches except base
+        return branches.filter((branch) => branch !== branches[0]);
+    }
+
+    // Return branches from integration branch onwards (excluding integration branch itself)
+    return branches.slice(integrationIndex + 1);
+}
+
 async function buildPRListMarkdown(
     prDetails: Map<string, PullRequest>,
     branches: string[],
@@ -104,11 +116,10 @@ async function buildPRListMarkdown(
     const prBranches = branches.filter((branch) => branch !== baseBranch);
 
     // Get only branches from integration branch to target branch (excluding integration branch itself)
-    const integrationIndex = branches.indexOf(integrationBranch);
-    const targetBranches = integrationIndex !== -1 ? branches.slice(integrationIndex + 1) : prBranches;
-
-    // Get all PRs in the chain from integration branch onwards
-    const allChainPRs = Array.from(prDetails.values()).filter((pr) => targetBranches.includes(pr.headRefName));
+    // Get only PRs from integration branch to target branch (excluding integration branch itself)
+    const excludedBranches = getBranchesFromIntegrationToTarget(branches, integrationBranch);
+    const allChainPRs = Array.from(prDetails.values()).filter((pr) => !excludedBranches.includes(pr.headRefName));
+    const targetBranches = allChainPRs.map((pr) => pr.headRefName);
 
     // Get merged PRs that target the integration branch, but only those from target branches
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
