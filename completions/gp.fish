@@ -2,55 +2,53 @@
 
 # Only add completions if gp command exists
 if type -q gp
+    # Remove any default file completion
     complete -c gp -f
 
-    # Options
+    # Main options
     complete -c gp -s d -l dry-run -d "Show what would be executed without making changes"
-    complete -c gp -s e -l edit -x -a "title desc" -d "Edit PR attributes. Available: title, desc"
-    complete -c gp -s i -l integration -x -a "(__fish_gp_branches)" -d "Specify integration branch for edit operations"
+    complete -c gp -s e -l edit -x -a "title desc" -d "Edit PR attributes"
+    complete -c gp -s i -l integration -x -a "(__fish_gp_branches)" -d "Specify integration branch"
     complete -c gp -l debug -d "Enable debug logging"
     complete -c gp -s V -l version -d "Output the version number"
     complete -c gp -s h -l help -d "Display help for command"
 
-    # Branch completion for target-branch argument
-    complete -c gp -n "__fish_gp_needs_target_branch" -a "(__fish_gp_branches)"
+    # Target branch argument (first positional argument)
+    complete -c gp -n "__fish_gp_no_target_branch" -a "(__fish_gp_branches)" -d "Target branch"
 end
 
-# Helper functions
-function __fish_gp_needs_target_branch
+# Helper function: check if target branch is not yet provided
+function __fish_gp_no_target_branch
     set -l cmd (commandline -opc)
-    set -l has_target_branch 0
-    set -l skip_next 0
     
-    # Check if we already have a target branch (non-option argument)
+    # Skip the command name
     for i in (seq 2 (count $cmd))
-        if test $skip_next -eq 1
-            set skip_next 0
-            continue
-        end
-        
         set -l arg $cmd[$i]
         
-        # Skip if this is an option
-        if string match -q -- '-*' $arg
-            # Check if this option takes a value
-            if string match -q -- '*integration*' $arg; or string match -q -- '*edit*' $arg; or test "$arg" = "-i"; or test "$arg" = "-e"
-                set skip_next 1
+        # If this is not an option (doesn't start with -)
+        if not string match -q -- '-*' $arg
+            # Check if the previous argument was an option that takes a value
+            if test $i -gt 2
+                set -l prev_arg $cmd[(math $i - 1)]
+                # If previous was -i, --integration, -e, or --edit, this is the option value
+                if test "$prev_arg" = "-i"; or test "$prev_arg" = "--integration"; or test "$prev_arg" = "-e"; or test "$prev_arg" = "--edit"
+                    continue
+                end
             end
-            continue
+            # Found a target branch
+            return 1
         end
-        
-        # This is a non-option argument, so it's the target branch
-        set has_target_branch 1
-        break
     end
     
-    test $has_target_branch -eq 0
+    # No target branch found
+    return 0
 end
 
+# Helper function: get git branches
 function __fish_gp_branches
     # Only show branches if we're in a git repository
     if git rev-parse --git-dir >/dev/null 2>&1
-        git branch --all 2>/dev/null | sed 's/^[\* ] *//' | sed 's/^remotes\/origin\///' | grep -v '^HEAD ->' | sort -u
+        # Get local and remote branches, clean up formatting
+        git branch --all 2>/dev/null | string replace -r '^\s*[\*\s]*' '' | string replace -r '^remotes/origin/' '' | grep -v '^HEAD ->' | sort -u
     end
 end
