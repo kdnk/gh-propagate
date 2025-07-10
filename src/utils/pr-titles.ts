@@ -1,9 +1,8 @@
 import chalk from 'chalk';
 import type { PullRequest } from '../types/index.js';
-import { updatePRTitle, getMergedPRs } from '../services/github.js';
-import { sortPRsByMergeDateOrNumber, filterPRsExcludingBaseBranch } from './pr-sorting.js';
+import { updatePRTitle } from '../services/github.js';
 import { PR_NUMBER_PREFIX_PATTERN, MESSAGES } from '../constants/index.js';
-import { getBranchesFromIntegrationToTarget } from './branch-filtering.js';
+import { getIntegrationPRsForProcessing } from './pr-processing.js';
 
 export function removeExistingNumberPrefix(title: string): string {
     return title.replace(PR_NUMBER_PREFIX_PATTERN, '');
@@ -28,7 +27,6 @@ interface UpdateTitlesOptions {
     dryRun?: boolean;
 }
 
-
 export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): Promise<void> {
     const { prDetails, branches, integrationBranch, baseBranch, dryRun = false } = options;
     const prBranches = branches.filter((branch) => branch !== baseBranch);
@@ -40,26 +38,11 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
 
     console.log(chalk.blue(`\n${MESSAGES.UPDATING_PR_TITLES}`));
 
-    // Get only PRs from integration branch to target branch (excluding integration branch itself)
-    const excludedBranches = getBranchesFromIntegrationToTarget(branches, integrationBranch);
-    const allChainPRs = Array.from(prDetails.values()).filter((pr) => !excludedBranches.includes(pr.headRefName));
-    const targetBranches = allChainPRs.map((pr) => pr.headRefName);
-
-    // Get merged PRs that target the integration branch, but only those from target branches
-    const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
-    const filteredMergedPRs = mergedPRsToIntegration.filter((pr) => targetBranches.includes(pr.headRefName));
-
-    // Combine chain PRs and filtered merged PRs that target integration branch
-    const allIntegrationBranchPRs = [...allChainPRs, ...filteredMergedPRs];
-
-    // Remove duplicates (in case a PR appears in both lists)
-    const uniquePRs = allIntegrationBranchPRs.filter(
-        (pr, index, array) => array.findIndex((p) => p.number === pr.number) === index
-    );
-
-    const sortedPRs = sortPRsByMergeDateOrNumber(uniquePRs);
+    const sortedPRs = await getIntegrationPRsForProcessing(prDetails, branches, integrationBranch, baseBranch);
+    const targetBranches = sortedPRs.map((pr) => pr.headRefName);
     const total = sortedPRs.length;
     let successCount = 0;
+
     for (let i = 0; i < sortedPRs.length; i++) {
         const pr = sortedPRs[i];
         if (!pr) continue;
