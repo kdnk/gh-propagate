@@ -93,6 +93,7 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
     const total = sortedPRs.length;
     let successCount = 0;
 
+    console.log(`[pr-titles.ts:96] targetBranches: `, targetBranches);
     for (let i = 0; i < sortedPRs.length; i++) {
         const pr = sortedPRs[i];
         if (!pr) continue;
