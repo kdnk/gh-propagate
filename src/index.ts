@@ -21,7 +21,7 @@ async function main(): Promise<void> {
         .action(async (targetBranch: string, options: PropagateOptions) => {
             try {
                 if (options.debug) {
-                    console.log('Debug mode enabled');
+                    console.log(chalk.yellow('🐛 Debug mode enabled'));
                 }
 
                 await propagateChanges(targetBranch, {

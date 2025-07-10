@@ -28,32 +28,20 @@ interface UpdateTitlesOptions {
 }
 
 function getBranchesFromIntegrationToTarget(branches: string[], integrationBranch: string): string[] {
-    console.log(`🔍 Debug - All branches: [${branches.join(' ← ')}]`);
-    console.log(`🔍 Debug - Integration branch: ${integrationBranch}`);
-
     const integrationIndex = branches.indexOf(integrationBranch);
-    console.log(`🔍 Debug - Integration index: ${integrationIndex}`);
 
     if (integrationIndex === -1) {
         // Integration branch not found in chain, return all branches except base
-        const result = branches.filter((branch) => branch !== branches[0]);
-        console.log(`🔍 Debug - Integration not found, returning: [${result.join(', ')}]`);
-        return result;
+        return branches.filter((branch) => branch !== branches[0]);
     }
 
     // Return branches from integration branch onwards (excluding integration branch itself)
-    const result = branches.slice(integrationIndex + 1);
-    console.log(`🔍 Debug - Returning branches from integration onwards: [${result.join(', ')}]`);
-    return result;
+    return branches.slice(integrationIndex + 1);
 }
 
 export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): Promise<void> {
     const { prDetails, branches, integrationBranch, baseBranch, dryRun = false } = options;
-    console.log(`[pr-titles.ts:52] branches: `, branches);
     const prBranches = branches.filter((branch) => branch !== baseBranch);
-    console.log(`[pr-titles.ts:54] prBranches: `, prBranches);
-    console.log(`[pr-titles.ts:55] integrationBranch: `, integrationBranch);
-    console.log(`[pr-titles.ts:56] baseBranch: `, baseBranch);
 
     if (prBranches.length === 0) {
         console.log(chalk.yellow(MESSAGES.NO_PRS_TO_UPDATE));
@@ -64,26 +52,15 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
 
     // Get only PRs from integration branch to target branch (excluding integration branch itself)
     const excludedBranches = getBranchesFromIntegrationToTarget(branches, integrationBranch);
-    console.log(`🔍 Debug - Excluded branches for title updates: [${excludedBranches.join(', ')}]`);
     const allChainPRs = Array.from(prDetails.values()).filter((pr) => !excludedBranches.includes(pr.headRefName));
     const targetBranches = allChainPRs.map((pr) => pr.headRefName);
 
     // Get merged PRs that target the integration branch, but only those from target branches
     const mergedPRsToIntegration = await getMergedPRs(integrationBranch);
-    console.log(
-        `🔍 Debug - All merged PRs to integration: [${mergedPRsToIntegration.map((pr) => `${pr.headRefName}(#${pr.number})`).join(', ')}]`
-    );
-
     const filteredMergedPRs = mergedPRsToIntegration.filter((pr) => targetBranches.includes(pr.headRefName));
-    console.log(
-        `🔍 Debug - Filtered merged PRs: [${filteredMergedPRs.map((pr) => `${pr.headRefName}(#${pr.number})`).join(', ')}]`
-    );
 
     // Combine chain PRs and filtered merged PRs that target integration branch
     const allIntegrationBranchPRs = [...allChainPRs, ...filteredMergedPRs];
-    console.log(
-        `🔍 Debug - All PRs for numbering: [${allIntegrationBranchPRs.map((pr) => `${pr.headRefName}(#${pr.number})`).join(', ')}]`
-    );
 
     // Remove duplicates (in case a PR appears in both lists)
     const uniquePRs = allIntegrationBranchPRs.filter(
@@ -93,15 +70,9 @@ export async function updatePRTitlesWithNumbers(options: UpdateTitlesOptions): P
     const sortedPRs = sortPRsByMergeDateOrNumber(uniquePRs);
     const total = sortedPRs.length;
     let successCount = 0;
-
-    console.log(`[pr-titles.ts:96] targetBranches: `, targetBranches);
     for (let i = 0; i < sortedPRs.length; i++) {
         const pr = sortedPRs[i];
         if (!pr) continue;
-
-        console.log(
-            `🔍 Debug - Checking PR #${pr.number} (${pr.headRefName}): targetBranches.includes = ${targetBranches.includes(pr.headRefName)}`
-        );
 
         if (targetBranches.includes(pr.headRefName)) {
             const position = i + 1;
