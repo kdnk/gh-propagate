@@ -1,5 +1,5 @@
 // Version
-export const VERSION = '0.4.1';
+export const VERSION = '0.4.2';
 
 // Edit operations
 export const EDIT_OPERATIONS = {
