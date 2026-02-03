@@ -78,11 +78,7 @@ export async function updatePRDescription(
     }
 }
 
-export async function updatePRBranch(
-    prNumber: number,
-    headBranch: string,
-    dryRun: boolean = false
-): Promise<boolean> {
+export async function updatePRBranch(prNumber: number, headBranch: string, dryRun: boolean = false): Promise<boolean> {
     try {
         logDebug(`Updating PR #${prNumber} branch with base branch changes`);
         if (dryRun) {
@@ -96,7 +92,7 @@ export async function updatePRBranch(
 
             // Sync local branch with remote
             logDebug(`Fetching origin/${headBranch} to local`);
-            await $`git fetch origin ${headBranch}:${headBranch}`.quiet();
+            await $`git fetch origin ${headBranch}`.quiet();
             console.log(chalk.gray(`   Fetched origin/${headBranch}`));
 
             logDebug(`Successfully updated PR #${prNumber} branch`);
