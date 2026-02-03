@@ -99,6 +99,7 @@ export async function updatePRBranch(prNumber: number, headBranch: string, dryRu
             return true;
         }
     } catch (error) {
+      console.log(`[github.ts:102] error: `, error);
         console.error(`❌ Failed to update PR #${prNumber} branch:`, formatErrorMessage(error));
         logDebug(`Failed to update PR #${prNumber} branch: ${formatErrorMessage(error)}`);
         return false;
