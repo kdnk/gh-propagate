@@ -13,7 +13,7 @@
 - Uses `gh pr view --json number,headRefName,baseRefName,url,title,body,state <branch>` to discover PR chains
 - Builds PR chain by traversing from target branch back to base branch
 - Merges changes in reverse order (base → target) to propagate changes sequentially
-- Each merge step: `git switch`, `git pull`, then `git merge --no-ff`
+- Each merge step uses `gh pr update-branch <pr-number>` followed by `git fetch origin <branch>:<branch>` to sync local (no branch switching required)
 - Command line interface: `gp <target-branch>` with optional `--integration <branch>` for advanced operations
 
 ### Command Interface Design

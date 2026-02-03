@@ -21,11 +21,11 @@ Running `gp feature-2` will:
     - Find feature-1's base branch (main)
     - Stop when reaching a common base branch (`main`, `master`, `dev`, `develop`, `beta`, `staging`) or a branch without PR
 
-2. **Propagation Phase**: Merge changes in reverse order (base → target):
-    - Update main branch: `git switch main`, `git pull`
-    - Merge into feature-1: `git switch feature-1`, `git pull`, `git merge --no-ff main`, `git push`
-    - Update feature-1: `git switch feature-1`, `git pull`
-    - Merge into feature-2: `git switch feature-2`, `git pull`, `git merge --no-ff feature-1`, `git push`
+2. **Propagation Phase**: Merge changes in reverse order (base → target) using GitHub's "Update branch" feature:
+    - Update feature-1's branch: `gh pr update-branch <feature-1-pr-number>`, then `git fetch origin feature-1:feature-1`
+    - Update feature-2's branch: `gh pr update-branch <feature-2-pr-number>`, then `git fetch origin feature-2:feature-2`
+
+    This approach doesn't require local branch switching - merges happen on the remote via GitHub API, then local branches are synced.
 
 ### Integration Mode
 

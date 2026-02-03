@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 import { buildPRChain } from '../services/pr-chain.js';
-import { executeMergeOperation } from '../services/git.js';
-import { getPullRequest } from '../services/github.js';
+import { getPullRequest, updatePRBranch } from '../services/github.js';
 import { executeEditOperations } from '../utils/edit-operations.js';
 import { findBaseBranch } from '../utils/chain-traversal.js';
 import {
@@ -73,7 +72,7 @@ async function buildChainInfo(targetBranch: string, baseBranch: string, integrat
 }
 
 async function executeMergeChain(chainInfo: ChainInfo, dryRun: boolean): Promise<void> {
-    const { branches, prUrls } = chainInfo;
+    const { branches, prUrls, prDetails } = chainInfo;
     const reversedChain = [...branches].reverse();
     logDebug(`Processing merge chain in reverse order: [${reversedChain.join(', ')}]`);
 
@@ -94,7 +93,12 @@ async function executeMergeChain(chainInfo: ChainInfo, dryRun: boolean): Promise
             logDebug(`Target PR URL: ${targetUrl}`);
         }
 
-        await executeMergeOperation(sourceBranch, targetBranchStep, dryRun);
+        const targetPR = prDetails.get(targetBranchStep);
+        if (targetPR) {
+            await updatePRBranch(targetPR.number, targetPR.headRefName, dryRun);
+        } else {
+            console.error(chalk.red(`❌ No PR found for branch ${targetBranchStep}`));
+        }
     }
 }
 

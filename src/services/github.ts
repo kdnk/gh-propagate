@@ -77,3 +77,34 @@ export async function updatePRDescription(
         return false;
     }
 }
+
+export async function updatePRBranch(
+    prNumber: number,
+    headBranch: string,
+    dryRun: boolean = false
+): Promise<boolean> {
+    try {
+        logDebug(`Updating PR #${prNumber} branch with base branch changes`);
+        if (dryRun) {
+            logDryRun('Would update PR branch', `#${prNumber}`);
+            logDryRun('Would fetch', `origin/${headBranch}`);
+            return true;
+        } else {
+            logAPICall(`gh pr update-branch ${prNumber}`);
+            await $`gh pr update-branch ${prNumber}`.quiet();
+            console.log(chalk.green(`✅ Updated PR #${prNumber} branch`));
+
+            // Sync local branch with remote
+            logDebug(`Fetching origin/${headBranch} to local`);
+            await $`git fetch origin ${headBranch}:${headBranch}`.quiet();
+            console.log(chalk.gray(`   Fetched origin/${headBranch}`));
+
+            logDebug(`Successfully updated PR #${prNumber} branch`);
+            return true;
+        }
+    } catch (error) {
+        console.error(`❌ Failed to update PR #${prNumber} branch:`, formatErrorMessage(error));
+        logDebug(`Failed to update PR #${prNumber} branch: ${formatErrorMessage(error)}`);
+        return false;
+    }
+}

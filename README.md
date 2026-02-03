@@ -25,7 +25,7 @@ When you run `gh-propagate feature-2`, the tool will:
 
 1. Discover the PR chain: `dev → feature-1 → feature-2`
 2. Merge changes in order: `dev` → `feature-1` → `feature-2`
-3. Each merge step includes switching branches, pulling latest changes, and merging with `--no-ff`
+3. Each merge step uses `gh pr update-branch` to update the PR branch with base branch changes (no local branch switching required)
 
 ## Prerequisites
 
@@ -99,13 +99,9 @@ gp feature-branch --integration integration-branch --edit title desc
 ### Core Functionality
 
 1. **PR Chain Discovery**: Automatically discovers the chain of pull requests using `gh pr view --json number,headRefName,baseRefName,url,title,body --head <branch>`
-2. **Sequential Merging**: Merges changes in reverse order (base → target) with proper git operations:
-    - `git switch <source-branch>`
-    - `git pull`
-    - `git switch <target-branch>`
-    - `git pull`
-    - `git merge --no-ff <source-branch>`
-    - `git push`
+2. **Sequential Merging**: Merges changes in reverse order (base → target) using GitHub's "Update branch" feature:
+    - `gh pr update-branch <pr-number>` followed by `git fetch origin <branch>:<branch>`
+    - No local branch switching required - merges happen on the remote, then local branches are synced
 3. **Integration Branch Detection**: Automatically detects integration branches (PRs that merge directly into base branch) and includes merged PRs in all operations
 
 ### Edit Operations
