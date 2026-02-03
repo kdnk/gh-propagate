@@ -92,7 +92,7 @@ export async function updatePRBranch(prNumber: number, headBranch: string, dryRu
 
             // Sync local branch with remote
             logDebug(`Fetching origin/${headBranch} to local`);
-            await $`git fetch origin ${headBranch}`.quiet();
+            await $`git fetch origin ${headBranch}`;
             console.log(chalk.gray(`   Fetched origin/${headBranch}`));
 
             logDebug(`Successfully updated PR #${prNumber} branch`);
