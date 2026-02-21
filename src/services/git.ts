@@ -26,15 +26,57 @@ export async function executeGitCommand(command: string, dryRun: boolean = false
     }
 }
 
+async function getWorktreePath(branch: string): Promise<string | null> {
+    const result = await $`git worktree list --porcelain`.quiet();
+    const output = result.stdout.toString().trim();
+
+    const blocks = output.split('\n\n');
+    for (const block of blocks) {
+        const lines = block.split('\n');
+        let worktreePath: string | undefined;
+        let branchRef: string | undefined;
+
+        for (const line of lines) {
+            if (line.startsWith('worktree ')) {
+                worktreePath = line.slice('worktree '.length);
+            } else if (line.startsWith('branch ')) {
+                branchRef = line.slice('branch '.length);
+            }
+        }
+
+        if (worktreePath && branchRef === `refs/heads/${branch}`) {
+            return worktreePath;
+        }
+    }
+
+    return null;
+}
+
 export async function executeMergeOperation(
     sourceBranch: string,
     targetBranch: string,
     dryRun: boolean = false
 ): Promise<void> {
-    await executeGitCommand(`git switch ${sourceBranch}`, dryRun);
-    await executeGitCommand(`git pull`, dryRun);
-    await executeGitCommand(`git switch ${targetBranch}`, dryRun);
-    await executeGitCommand(`git pull`, dryRun);
-    await executeGitCommand(`git merge --no-ff ${sourceBranch}`, dryRun);
-    await executeGitCommand(`git push`, dryRun);
+    const sourceWorktreePath = await getWorktreePath(sourceBranch);
+    const targetWorktreePath = await getWorktreePath(targetBranch);
+
+    // Update source branch
+    if (sourceWorktreePath) {
+        await executeGitCommand(`git -C "${sourceWorktreePath}" pull`, dryRun);
+    } else {
+        await executeGitCommand(`git switch ${sourceBranch}`, dryRun);
+        await executeGitCommand(`git pull`, dryRun);
+    }
+
+    // Update target branch, merge, and push
+    if (targetWorktreePath) {
+        await executeGitCommand(`git -C "${targetWorktreePath}" pull`, dryRun);
+        await executeGitCommand(`git -C "${targetWorktreePath}" merge --no-ff ${sourceBranch}`, dryRun);
+        await executeGitCommand(`git -C "${targetWorktreePath}" push`, dryRun);
+    } else {
+        await executeGitCommand(`git switch ${targetBranch}`, dryRun);
+        await executeGitCommand(`git pull`, dryRun);
+        await executeGitCommand(`git merge --no-ff ${sourceBranch}`, dryRun);
+        await executeGitCommand(`git push`, dryRun);
+    }
 }
