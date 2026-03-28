@@ -171,6 +171,17 @@ gp feature-step-2 --edit title
 ❌ --integration option is required when using --edit
 ```
 
+### Missing Edit Flag
+
+```bash
+gp feature-step-2 --integration integration-branch
+```
+
+**Output:**
+```
+❌ --edit option is required when using --integration
+```
+
 ## Best Practices
 
 ### 1. Use Dry Run First

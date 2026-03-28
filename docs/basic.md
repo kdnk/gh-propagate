@@ -40,8 +40,8 @@ gp <target-branch> [options]
 Available options:
 
 - `--dry-run, -d`: Preview operations without executing
-- `--edit <operations>, -e`: Edit PR attributes - available: `title`, `desc` (requires `--integration`)
-- `--integration <branch>, -i`: Specify integration branch for edit operations
+- `--edit <operations>, -e`: Edit PR attributes - available: `title`, `desc` (must be used with `--integration`)
+- `--integration <branch>, -i`: Specify integration branch (must be used with `--edit`)
 - `--debug`: Enable debug logging for troubleshooting
 - `--version, -v`: Show version
 
